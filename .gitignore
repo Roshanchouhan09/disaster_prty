@@ -58,3 +58,8 @@ backend/uploads/
 
 # Keep sample env file
 !.env.example
+
+node_modules/
+frontend/node_modules/
+dist/
+build/
