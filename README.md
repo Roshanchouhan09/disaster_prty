@@ -12,7 +12,7 @@
 
 ## 1. System Overview & Problem Statement
 
-During the critical first 24 hours following a widespread disaster, emergency operations centers receive fragmented, contradictory, and unverified reports across word-of-mouth, social media panic, and satellite fragments. 
+During the critical first 24 hours following a widespread disaster, emergency operations centers receive fragmented, contradictory, and unverified reports across word-of-mouth, social media panic, and satellite fragments.
 
 **DISASTERFOG AI** converts noisy multi-source reports into **verified, prioritized, geospatially actionable intelligence** and optimizes scarce rescue equipment (motor boats, heavy excavators, trauma ambulances, medical teams) with transparent human-readable explanations.
 
@@ -62,6 +62,7 @@ During the critical first 24 hours following a widespread disaster, emergency op
 ```
 
 ### Key AI Algorithms:
+
 1. **Dynamic Transparent Reliability Engine**:
    $$\text{Reliability} = \text{Baseline}(\text{SourceType}) + \text{MediaBonus} + \text{CrossAgreementBonus} - \text{ContradictionPenalty}$$
    Returns transparent factor breakdown for every report.
@@ -69,46 +70,82 @@ During the critical first 24 hours following a widespread disaster, emergency op
 3. **Contradiction Detection Engine**: Flags conflicting claims (e.g. "bridge collapsed" vs "bridge open", or major water depth disparities) for human review.
 4. **Explainable Priority & High-Mortality Risk Scoring**:
    $$\text{Priority} = 0.30 \cdot \text{Severity} + 0.25 \cdot \text{PeopleAtRisk} + 0.15 \cdot \text{Vulnerability} + 0.10 \cdot \text{Access} + 0.10 \cdot \text{Confidence} + 0.10 \cdot \text{Time}$$
-5. **Rescue Resource Optimizer**: Recommends equipment matching ground conditions with natural language reasoning (e.g., *"Deploy 2 Motorized Boats & 1 Trauma Medical Team because 320 people are trapped in 2.5m floodwater with blocked road access"*).
+5. **Rescue Resource Optimizer**: Recommends equipment matching ground conditions with natural language reasoning (e.g., _"Deploy 2 Motorized Boats & 1 Trauma Medical Team because 320 people are trapped in 2.5m floodwater with blocked road access"_).
 
 ---
 
 ## 3. Quickstart & Installation Guide
 
-### Method 1: Local Direct Execution (Zero External Dependencies)
+### Prerequisites
 
-#### 1. Backend Setup:
+- Python 3.11+
+- Node.js 18+ with npm
+- Git
+
+### Method 1: Local Development Setup (Recommended)
+
+#### Step 1: Clone & Navigate to Project
+
+```bash
+git clone https://github.com/rahman2428/AI-based-Disaster-Intelligence-Decision-Support-System.git
+cd AI-based-Disaster-Intelligence-Decision-Support-System
+```
+
+#### Step 2: Backend Setup (Terminal 1)
+
 ```bash
 cd backend
+
+# Create virtual environment
 python -m venv venv
+
+# Activate virtual environment
 # On Windows PowerShell:
 .\venv\Scripts\Activate.ps1
+# On Windows CMD:
+venv\Scripts\activate.bat
 # On Linux/macOS:
 source venv/bin/activate
 
+# Install dependencies
 pip install -r requirements.txt
+
+# Run backend server
 python -m app.main
 ```
-> If you are running from the backend folder and the app still cannot resolve imports, use the module form above or run `PYTHONPATH=. python app/main.py`.
 
-*Backend API server will run at http://localhost:8000 (OpenAPI Docs at http://localhost:8000/docs).*
+**Backend will run at:** http://localhost:8000  
+**OpenAPI Docs:** http://localhost:8000/docs  
+**ReDoc:** http://localhost:8000/redoc
 
-#### 2. Frontend Setup:
+#### Step 3: Frontend Setup (Terminal 2)
+
 ```bash
 cd frontend
+
+# Install dependencies
 npm install
+
+# Run development server
 npm run dev
 ```
-*Frontend application will run at http://localhost:3000.*
+
+**Frontend will run at:** http://localhost:3000
 
 ---
 
 ### Method 2: Docker Compose Deployment
 
 ```bash
+# From project root directory
 docker compose up --build
 ```
-*Access Frontend at http://localhost:3000 and Backend API at http://localhost:8000.*
+
+**Access:**
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
 
 ---
 
@@ -138,6 +175,7 @@ docker compose up --build
 ## 5. Automated Test Suite
 
 Run backend pytest unit and integration tests:
+
 ```bash
 python -m pytest backend/tests
 ```
@@ -146,10 +184,10 @@ python -m pytest backend/tests
 
 ## 6. Default Demo User Accounts
 
-| Role | Username | Password |
-|---|---|---|
-| Administrator | `admin` | `password123` |
-| EOC Controller | `eoc_operator` | `password123` |
-| Field Officer | `field_officer` | `password123` |
-| Rescue Leader | `rescue_leader` | `password123` |
-| Analyst | `analyst_user` | `password123` |
+| Role           | Username        | Password      |
+| -------------- | --------------- | ------------- |
+| Administrator  | `admin`         | `password123` |
+| EOC Controller | `eoc_operator`  | `password123` |
+| Field Officer  | `field_officer` | `password123` |
+| Rescue Leader  | `rescue_leader` | `password123` |
+| Analyst        | `analyst_user`  | `password123` |
