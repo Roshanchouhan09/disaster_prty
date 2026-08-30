@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from './components/common/Header';
 import { ApiKeyModal } from './components/common/ApiKeyModal';
 import { SimulationControls } from './components/simulation/SimulationControls';
@@ -14,6 +14,7 @@ import { ResourceManagement } from './components/resources/ResourceManagement';
 import { RescueMissions } from './components/missions/RescueMissions';
 import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { AuditLogsView } from './components/common/AuditLogsView';
+import { ToastProvider } from './components/common/Toast';
 
 import { incidentsApi, analyticsApi, resourcesApi, missionsApi } from './services/api';
 import { Incident, AnalyticsSummary, Resource, RescueMission, User, IncidentConflict } from './types';
@@ -22,13 +23,13 @@ const DEFAULT_USER: User = {
   id: 2,
   username: 'eoc_operator',
   email: 'eoc@disasterfog.ai',
-  full_name: 'EOC Controller Lead',
+  full_name: 'Commander Sharma',
   role: 'eoc',
   is_active: true,
   created_at: new Date().toISOString()
 };
 
-export function App() {
+function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [currentUser, setCurrentUser] = useState<User | null>(DEFAULT_USER);
   const [showDemoBar, setShowDemoBar] = useState(true);
@@ -75,13 +76,17 @@ export function App() {
       ws.onopen = () => setIsWsConnected(true);
       ws.onclose = () => setIsWsConnected(false);
       ws.onmessage = (evt) => {
-        const msg = JSON.parse(evt.data);
-        if (['NEW_REPORT', 'INCIDENT_VERIFIED', 'MISSION_CREATED', 'SIMULATION_TICK'].includes(msg.type)) {
-          loadData();
+        try {
+          const msg = JSON.parse(evt.data);
+          if (['NEW_REPORT', 'INCIDENT_VERIFIED', 'MISSION_CREATED', 'SIMULATION_TICK'].includes(msg.type)) {
+            loadData();
+          }
+        } catch (e) {
+          // ignore parsing error
         }
       };
     } catch (err) {
-      console.log('WS connection error, fallback to polling');
+      console.log('WS connection fallback to polling');
     }
 
     const interval = setInterval(loadData, 5000);
@@ -91,8 +96,20 @@ export function App() {
     };
   }, []);
 
+  const criticalCount = useMemo(() => {
+    return incidents.filter(i => i.severity === 'CRITICAL' || i.is_high_mortality_zone).length;
+  }, [incidents]);
+
+  const unverifiedCount = useMemo(() => {
+    return incidents.filter(i => i.verification_status === 'UNVERIFIED').length;
+  }, [incidents]);
+
+  const conflictsCount = useMemo(() => {
+    return incidents.reduce((acc, curr) => acc + (curr.conflicts_count || 0), 0);
+  }, [incidents]);
+
   return (
-    <div className="min-h-screen flex flex-col bg-dark-900 text-gray-100 font-sans">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans antialiased selection:bg-red-500 selection:text-white">
       
       {/* Simulation Demo Controls Bar */}
       {showDemoBar && (
@@ -110,10 +127,13 @@ export function App() {
         onOpenApiKey={() => setShowApiKeyModal(true)}
         onOpenBriefing={() => setShowBriefingModal(true)}
         onOpenWeights={() => setShowWeightsModal(true)}
+        criticalCount={criticalCount}
+        unverifiedCount={unverifiedCount}
+        conflictsCount={conflictsCount}
       />
 
-      {/* Main Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Main Body Layout */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {activeTab === 'dashboard' && (
           <CommandCenter
             analytics={analytics}
@@ -202,11 +222,22 @@ export function App() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-gray-800 bg-dark-800/60 py-4 text-center text-xs text-gray-500 font-mono">
-        DISASTERFOG AI PLATFORM v1.0.0 &copy; 2026 Emergency Operations Command | Production-Grade Decision Support System
+      <footer className="border-t border-slate-800/80 bg-slate-950/80 py-5 text-center text-xs text-slate-400 font-mono">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>DISASTERFOG AI &copy; 2026 Emergency Operations Command</span>
+          <span className="text-slate-400">Production-Ready AI Decision Intelligence Platform</span>
+        </div>
       </footer>
 
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <ToastProvider>
+      <MainApp />
+    </ToastProvider>
   );
 }
 

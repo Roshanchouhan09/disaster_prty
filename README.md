@@ -191,3 +191,37 @@ python -m pytest backend/tests
 | Field Officer  | `field_officer` | `password123` |
 | Rescue Leader  | `rescue_leader` | `password123` |
 | Analyst        | `analyst_user`  | `password123` |
+
+---
+
+## 7. GIS Disaster Map Architecture & Working Mechanism
+
+The **GIS Disaster Map** is the geospatial operational core of DISASTERFOG AI. It translates tabular incident data into interactive spatial intelligence for commanders.
+
+```
++-----------------------------------------------------------------------------------+
+|                           GIS SPATIAL TRIAGE CANVAS                               |
++-----------------------------------------------------------------------------------+
+|  [Base Layers]       Google Satellite Hybrid | Google Terrain | Carto Dark        |
+|  [Risk Geofence]     1200m High-Mortality Red Buffer Zones (Pulse Animation)     |
+|  [Incident Pins]     Color-Coded Severity Markers (Critical, High, Medium, Low)   |
+|  [Infrastructure]    Hospitals (ICU Beds Live Capacity) & Shelters (Occupancy)    |
+|  [Interactive Flow]  Click Pin -> Inspect AI Reasoning -> One-Click Dispatch     |
++-----------------------------------------------------------------------------------+
+```
+
+### 1. Multi-Layer Basemap Switcher (Google Maps Platform)
+* **Google Satellite Hybrid (`lyrs=y`)**: High-resolution photorealistic satellite imagery fused with street labels, bridges, and riverbanks.
+* **Google Terrain (`lyrs=p`)**: Topographic contour lines showing elevation drops, flash-flood drainage corridors, and mountain passes.
+* **Google Roadmap (`lyrs=m`)**: Standard clear municipal street grid.
+* **Carto Dark Tactical**: High-contrast dark theme designed for nocturnal emergency operation centers.
+
+### 2. Spatial Clustering Formula (Haversine Distance)
+Raw crowdsourced reports are clustered into unified incident markers using the great-circle Haversine formula:
+$$d = 2R \cdot \arcsin\left(\sqrt{\sin^2\left(\frac{\Delta \text{lat}}{2}\right) + \cos(\text{lat}_1)\cos(\text{lat}_2)\sin^2\left(\frac{\Delta \text{lng}}{2}\right)}\right)$$
+* Where $R = 6371\text{ km}$ (Earth radius). Reports with $d \le 1.8\text{ km}$ and temporal delta $< 120\text{ minutes}$ are merged into one incident.
+
+### 3. Critical Infrastructure & Risk Buffers
+* **High-Mortality Zones (Red Dashed Circles)**: Automatically projects a $1200\text{m}$ hazard perimeter around critical flash-flood and building collapse epicenters.
+* **Hospital ICU Tracker (Blue Markers)**: Displays live ICU bed availability and surgical trauma readiness.
+* **Emergency Relief Shelters (Purple Markers)**: Displays current capacity vs. occupancy for evacuation routing.

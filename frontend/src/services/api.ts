@@ -11,6 +11,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 15000,
 });
 
 // Inject Auth Token & Custom Gemini API Key if saved locally
@@ -29,11 +30,11 @@ api.interceptors.request.use((config) => {
 });
 
 export const authApi = {
-  login: async (username: string, password: str): Promise<{ access_token: string; user: User }> => {
+  login: async (username: string, password: string): Promise<{ access_token: string; user: User }> => {
     const res = await api.post('/auth/login', { username, password });
     return res.data;
   },
-  register: async (data: Partial<User> & { password: str }): Promise<User> => {
+  register: async (data: Partial<User> & { password: string }): Promise<User> => {
     const res = await api.post('/auth/register', data);
     return res.data;
   },
@@ -64,7 +65,7 @@ export const incidentsApi = {
     const res = await api.post(`/incidents/${id}/escalate`, { status: 'ESCALATED', notes });
     return res.data;
   },
-  recalculateWeights: async (weights: Record<string, number>): Promise<any> => {
+  recalculateWeights: async (weights: Record<string, number>): Promise<{ status: string; recalculated_incidents: number }> => {
     const res = await api.post('/incidents/recalculate-priority', weights);
     return res.data;
   },
@@ -161,3 +162,42 @@ export const simulationApi = {
     return res.data;
   }
 };
+
+// Export Helpers
+export function exportDataAsCsv(filename: string, rows: Record<string, any>[]) {
+  if (!rows || rows.length === 0) return;
+  const headers = Object.keys(rows[0]);
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => 
+      headers.map(header => {
+        const val = row[header];
+        if (typeof val === 'object' && val !== null) {
+          return `"${JSON.stringify(val).replace(/"/g, '""')}"`;
+        }
+        return `"${String(val ?? '').replace(/"/g, '""')}"`;
+      }).join(',')
+    )
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+export function exportDataAsJson(filename: string, data: any) {
+  const jsonStr = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${filename}.json`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}

@@ -61,6 +61,7 @@ export interface IncidentConflict {
   report_b_id: number;
   claim_a: string;
   claim_b: string;
+  description?: string;
   status: 'OPEN' | 'RESOLVED';
   resolution_notes?: string;
   created_at: string;

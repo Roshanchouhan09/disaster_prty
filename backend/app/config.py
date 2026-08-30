@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./disasterfog.db")
     REDIS_URL: Optional[str] = os.getenv("REDIS_URL", None)
     
-    LLM_API_KEY: Optional[str] = os.getenv("LLM_API_KEY", "AIzaSyDrQwNGJgcbiQs6gZu6Fz0l81w0gF7Uswo")
-    MAP_PROVIDER_KEY: Optional[str] = os.getenv("MAP_PROVIDER_KEY", "AIzaSyCjKQHHYbSlFklAva69Nf2ah-gujRWzzI0")
+    LLM_API_KEY: Optional[str] = os.getenv("LLM_API_KEY", os.getenv("GEMINI_API_KEY", None))
+    MAP_PROVIDER_KEY: Optional[str] = os.getenv("MAP_PROVIDER_KEY", os.getenv("GOOGLE_MAPS_API_KEY", None))
     SATELLITE_API_KEY: Optional[str] = os.getenv("SATELLITE_API_KEY", None)
     
     # Priority score default weights (Admin configurable)

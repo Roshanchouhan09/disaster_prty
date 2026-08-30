@@ -107,7 +107,7 @@ class GeminiLLMService:
         total_reports: int,
         verified_incidents: int,
         critical_zones: int,
-        affected_pop: number,
+        affected_pop: int,
         custom_key: Optional[str] = None
     ) -> str:
         """
@@ -140,9 +140,11 @@ class GeminiLLMService:
                 print(f"Gemini API Briefing Error: {e}")
 
         # Deterministic Structured Fallback Report
+        from datetime import datetime, timezone
+        timestamp_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
         return f"""# EXECUTIVE SITUATIONAL BRIEFING
 **DISASTER EVENT:** {active_event_name}
-**TIMESTAMP:** {os.popen('date /t').read().strip() if os.name == 'nt' else '2026-08-30'} | **CLASSIFICATION:** TOP PRIORITY / RESTRICTED
+**TIMESTAMP:** {timestamp_str} | **CLASSIFICATION:** TOP PRIORITY / RESTRICTED
 
 ---
 

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Smartphone, MapPin, Camera, Send, Wifi, WifiOff, CheckCircle2, RefreshCw, Languages, Mic } from 'lucide-react';
+import { 
+  Smartphone, MapPin, Camera, Send, Wifi, WifiOff, CheckCircle2, 
+  RefreshCw, Languages, Mic, Volume2, Image, Trash2, Shield
+} from 'lucide-react';
 import { reportsApi } from '../../services/api';
+import { useToast } from '../common/Toast';
 
 const SAMPLE_MULTILINGUAL_REPORTS = [
   {
@@ -22,21 +26,23 @@ const SAMPLE_MULTILINGUAL_REPORTS = [
 ];
 
 export const FieldReportApp: React.FC = () => {
+  const { success, error, info, warning } = useToast();
   const [sourceType, setSourceType] = useState('field_officer');
   const [reporterName, setReporterName] = useState('Capt. Rahul Singh');
   const [latitude, setLatitude] = useState(26.1200);
   const [longitude, setLongitude] = useState(85.4500);
-  const [locationName, setLocationName] = useState('St. Jude Sector 4');
+  const [locationName, setLocationName] = useState('St. Jude Sector 4 Model School');
   const [description, setDescription] = useState(SAMPLE_MULTILINGUAL_REPORTS[0].text);
   const [damageType, setDamageType] = useState('flood');
   const [waterLevel, setWaterLevel] = useState(2.4);
   const [peopleAffected, setPeopleAffected] = useState(320);
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [forceOffline, setForceOffline] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [attachedPhoto, setAttachedPhoto] = useState<string | null>("https://images.unsplash.com/photo-1547683905-f686c993aae5?w=500");
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -56,26 +62,31 @@ export const FieldReportApp: React.FC = () => {
     };
   }, []);
 
+  const effectivelyOnline = isOnline && !forceOffline;
+
   const handleGetLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setLatitude(pos.coords.latitude);
           setLongitude(pos.coords.longitude);
-          if (!locationName) {
-            setLocationName(`GPS Position (${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`);
-          }
+          setLocationName(`GPS Position (${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})`);
+          success('GPS Coordinates Captured', `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`);
         },
-        (err) => alert('Could not fetch GPS location. Please enter manually.')
+        () => {
+          warning('GPS Unavailable', 'Using simulated ground coordinates.');
+        }
       );
     }
   };
 
   const handleVoiceSim = () => {
     setIsRecordingVoice(true);
+    info('Voice Note Recording Started', 'Transcribing spoken field audio...');
     setTimeout(() => {
       setIsRecordingVoice(false);
-      setDescription("Recorded Voice Note: 'Bridge damaged near river overpass, water level rising rapidly to 2 meters.'");
+      setDescription("Recorded Voice Telemetry: 'Urgent: Main access road submerged under 2.2m water near Sector 4 Bridge. Multiple families trapped on residential roofs.'");
+      success('Audio Transcribed by AI', 'Voice input converted to structured observation.');
     }, 2000);
   };
 
@@ -83,9 +94,11 @@ export const FieldReportApp: React.FC = () => {
     if (offlineQueue.length === 0) return;
     setSubmitting(true);
     const remaining = [];
+    let syncedCount = 0;
     for (const item of offlineQueue) {
       try {
         await reportsApi.submit(item);
+        syncedCount++;
       } catch (err) {
         remaining.push(item);
       }
@@ -93,7 +106,9 @@ export const FieldReportApp: React.FC = () => {
     setOfflineQueue(remaining);
     localStorage.setItem('disasterfog_offline_queue', JSON.stringify(remaining));
     setSubmitting(false);
-    setSuccessMsg('Offline queue synced successfully!');
+    if (syncedCount > 0) {
+      success('Offline Queue Synced', `Successfully ingested ${syncedCount} queued field report(s).`);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,33 +117,33 @@ export const FieldReportApp: React.FC = () => {
 
     const reportData = {
       client_uuid: `UUID-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      source_type: sourceType,
+      source_type: sourceType as any,
       reporter_name: reporterName,
       latitude,
       longitude,
-      location_name: locationName || 'Field Sector',
+      location_name: locationName || 'Field Recon Sector',
       description,
       reported_damage: damageType,
       water_level: waterLevel,
       estimated_people_affected: peopleAffected,
-      media_urls: ["https://images.unsplash.com/photo-1547683905-f686c993aae5?w=500"]
+      media_urls: attachedPhoto ? [attachedPhoto] : []
     };
 
-    if (!isOnline) {
+    if (!effectivelyOnline) {
       const updatedQueue = [...offlineQueue, reportData];
       setOfflineQueue(updatedQueue);
       localStorage.setItem('disasterfog_offline_queue', JSON.stringify(updatedQueue));
-      setSuccessMsg('No internet connection. Saved to offline queue! Will auto-sync when online.');
+      warning('Offline Mode Active', 'Report saved to local device queue. Will auto-sync when online.');
     } else {
       try {
-        await reportsApi.submit(reportData);
-        setSuccessMsg('Multi-Lingual Report submitted & processed by Gemini AI Engine successfully!');
+        const res = await reportsApi.submit(reportData);
+        success('Disaster Report Ingested', `Assigned Code: ${res.report_code} | Reliability ${(res.source_reliability * 100).toFixed(0)}%`);
         setDescription('');
-      } catch (err) {
+      } catch (err: any) {
         const updatedQueue = [...offlineQueue, reportData];
         setOfflineQueue(updatedQueue);
         localStorage.setItem('disasterfog_offline_queue', JSON.stringify(updatedQueue));
-        setSuccessMsg('Network error. Saved to offline queue.');
+        warning('Network Error', 'Saved to offline queue.');
       }
     }
 
@@ -136,33 +151,46 @@ export const FieldReportApp: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-5">
       
       {/* Top Mobile Status Header */}
-      <div className="glass-panel p-4 rounded-xl flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Smartphone className="w-5 h-5 text-red-500" />
+      <div className="glass-panel p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 border border-slate-800">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="p-2.5 rounded-xl bg-red-600/20 text-red-400 border border-red-500/40 shrink-0">
+            <Smartphone className="w-5 h-5" />
+          </div>
           <div>
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">FIELD OFFICER DISASTER REPORT TOOL</h2>
-            <p className="text-[11px] text-gray-400">Multi-Lingual Offline-First Mobile Submission Interface</p>
+            <h2 className="text-sm font-black text-white uppercase tracking-wider">FIELD OFFICER DISASTER REPORT TOOL</h2>
+            <p className="text-[11px] text-slate-400 font-mono">Offline-First Multi-Lingual Recon Submission Interface</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className={`text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 ${
-            isOnline ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-600/20 text-amber-400 border border-amber-500/40'
-          }`}>
-            {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-            {isOnline ? 'ONLINE' : 'OFFLINE MODE'}
-          </span>
+        {/* Online / Offline Simulator Toggle */}
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <button
+            type="button"
+            onClick={() => setForceOffline(!forceOffline)}
+            className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border flex items-center gap-1.5 transition-colors ${
+              effectivelyOnline 
+                ? 'bg-emerald-600/20 text-emerald-400 border-emerald-500/40 hover:bg-emerald-600/30' 
+                : 'bg-amber-600/20 text-amber-400 border-amber-500/40 hover:bg-amber-600/30'
+            }`}
+            title="Click to toggle offline mode simulation"
+          >
+            {effectivelyOnline ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5 animate-pulse" />}
+            <span>{effectivelyOnline ? 'ONLINE' : 'OFFLINE MODE (ACTIVE)'}</span>
+          </button>
         </div>
       </div>
 
       {/* Multi-Lingual Presets Bar */}
-      <div className="bg-gray-900 border border-gray-800 p-3 rounded-xl space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
-          <Languages className="w-4 h-4" />
-          <span>Multi-Lingual AI Test Presets:</span>
+      <div className="bg-slate-950 border border-slate-800 p-3.5 rounded-xl space-y-2">
+        <div className="flex items-center justify-between text-xs font-bold text-amber-400">
+          <div className="flex items-center gap-1.5">
+            <Languages className="w-4 h-4" />
+            <span>Multi-Lingual AI Test Quick-Fills:</span>
+          </div>
+          <span className="text-[10px] text-slate-500 font-mono">Auto-translated by Gemini</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {SAMPLE_MULTILINGUAL_REPORTS.map((preset, idx) => (
@@ -170,7 +198,7 @@ export const FieldReportApp: React.FC = () => {
               key={idx}
               type="button"
               onClick={() => setDescription(preset.text)}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-[11px] px-2.5 py-1 rounded font-medium border border-gray-700"
+              className="bg-slate-900 hover:bg-slate-800 text-slate-200 text-[11px] px-3 py-1.5 rounded-lg font-medium border border-slate-700/80 transition-colors"
             >
               {preset.lang}
             </button>
@@ -180,40 +208,34 @@ export const FieldReportApp: React.FC = () => {
 
       {/* Offline Queue Bar */}
       {offlineQueue.length > 0 && (
-        <div className="bg-amber-950/40 border border-amber-500/40 p-3 rounded-xl flex items-center justify-between text-xs">
-          <div className="text-amber-300 font-semibold">
-            {offlineQueue.length} Field Report(s) Pending Offline Sync
+        <div className="bg-amber-950/30 border border-amber-500/40 p-3.5 rounded-xl flex items-center justify-between text-xs animate-in fade-in">
+          <div className="text-amber-300 font-semibold flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+            <span>{offlineQueue.length} Field Report(s) Queued Locally in Offline Storage</span>
           </div>
-          {isOnline && (
+          {effectivelyOnline && (
             <button
               onClick={syncOfflineQueue}
               disabled={submitting}
-              className="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3 py-1 rounded flex items-center gap-1 transition-colors"
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Sync Now
+              <RefreshCw className={`w-3.5 h-3.5 ${submitting ? 'animate-spin' : ''}`} />
+              <span>Sync All ({offlineQueue.length})</span>
             </button>
           )}
         </div>
       )}
 
       {/* Submission Form */}
-      <form onSubmit={handleSubmit} className="glass-panel p-6 rounded-xl space-y-4">
+      <form onSubmit={handleSubmit} className="glass-panel p-5 sm:p-6 rounded-2xl space-y-4 border border-slate-800">
         
-        {successMsg && (
-          <div className="bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 p-3 rounded-lg text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{successMsg}</span>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1">REPORTER SOURCE</label>
+            <label className="block text-xs font-bold text-slate-300 mb-1">REPORTER SOURCE</label>
             <select
               value={sourceType}
               onChange={(e) => setSourceType(e.target.value)}
-              className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white"
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500"
             >
               <option value="field_officer">Field Officer (Baseline 0.80)</option>
               <option value="citizen">Citizen Ground Call (Baseline 0.45)</option>
@@ -224,12 +246,12 @@ export const FieldReportApp: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1">REPORTER NAME</label>
+            <label className="block text-xs font-bold text-slate-300 mb-1">REPORTER NAME / CALLSIGN</label>
             <input
               type="text"
               value={reporterName}
               onChange={(e) => setReporterName(e.target.value)}
-              className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white"
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500"
               required
             />
           </div>
@@ -238,23 +260,23 @@ export const FieldReportApp: React.FC = () => {
         {/* Location Section */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-bold text-gray-300">LOCATION & GEOLOCATION</label>
+            <label className="block text-xs font-bold text-slate-300">LOCATION & GEOLOCATION</label>
             <button
               type="button"
               onClick={handleGetLocation}
               className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 font-semibold"
             >
               <MapPin className="w-3.5 h-3.5" />
-              Auto-Detect GPS
+              <span>Auto-Detect GPS</span>
             </button>
           </div>
 
           <input
             type="text"
-            placeholder="Location name or landmark..."
+            placeholder="Location landmark or street..."
             value={locationName}
             onChange={(e) => setLocationName(e.target.value)}
-            className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500"
             required
           />
 
@@ -263,15 +285,15 @@ export const FieldReportApp: React.FC = () => {
               type="number"
               step="any"
               value={latitude}
-              onChange={(e) => setLatitude(parseFloat(e.target.value))}
-              className="bg-dark-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white"
+              onChange={(e) => setLatitude(parseFloat(e.target.value) || 0)}
+              className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-white"
             />
             <input
               type="number"
               step="any"
               value={longitude}
-              onChange={(e) => setLongitude(parseFloat(e.target.value))}
-              className="bg-dark-900 border border-gray-700 rounded-lg px-3 py-1.5 text-white"
+              onChange={(e) => setLongitude(parseFloat(e.target.value) || 0)}
+              className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-white"
             />
           </div>
         </div>
@@ -279,11 +301,11 @@ export const FieldReportApp: React.FC = () => {
         {/* Damage Type & Water Depth Slider */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1">HAZARD / DAMAGE TYPE</label>
+            <label className="block text-xs font-bold text-slate-300 mb-1">HAZARD / DAMAGE TYPE</label>
             <select
               value={damageType}
               onChange={(e) => setDamageType(e.target.value)}
-              className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white"
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
             >
               <option value="flood">Flash Flood / Submerged</option>
               <option value="building_collapse">Building Structural Collapse</option>
@@ -295,7 +317,9 @@ export const FieldReportApp: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1">WATER DEPTH ({waterLevel} meters)</label>
+            <label className="block text-xs font-bold text-slate-300 mb-1">
+              WATER DEPTH: <strong className="text-amber-400 font-mono">{waterLevel} meters</strong>
+            </label>
             <input
               type="range"
               min="0"
@@ -303,33 +327,35 @@ export const FieldReportApp: React.FC = () => {
               step="0.1"
               value={waterLevel}
               onChange={(e) => setWaterLevel(parseFloat(e.target.value))}
-              className="w-full text-red-600"
+              className="w-full accent-red-500"
             />
           </div>
         </div>
 
         {/* Affected Count */}
         <div>
-          <label className="block text-xs font-bold text-gray-300 mb-1">ESTIMATED PEOPLE AFFECTED</label>
+          <label className="block text-xs font-bold text-slate-300 mb-1">ESTIMATED CIVILIANS AFFECTED</label>
           <input
             type="number"
             value={peopleAffected}
             onChange={(e) => setPeopleAffected(parseInt(e.target.value) || 0)}
-            className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
           />
         </div>
 
         {/* Description Textarea with Voice Sim */}
         <div>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-xs font-bold text-gray-300">FIELD OBSERVATION (ANY LANGUAGE)</label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-bold text-slate-300">FIELD OBSERVATION (ANY LANGUAGE)</label>
             <button
               type="button"
               onClick={handleVoiceSim}
-              className={`text-xs flex items-center gap-1 font-semibold ${isRecordingVoice ? 'text-red-500 animate-pulse' : 'text-amber-400 hover:text-amber-300'}`}
+              className={`text-xs flex items-center gap-1.5 font-bold ${
+                isRecordingVoice ? 'text-red-500 animate-pulse' : 'text-amber-400 hover:text-amber-300'
+              }`}
             >
               <Mic className="w-3.5 h-3.5" />
-              {isRecordingVoice ? 'Listening Voice Note...' : 'Record Voice Note'}
+              <span>{isRecordingVoice ? 'Listening & Transcribing...' : 'Record Voice Note'}</span>
             </button>
           </div>
 
@@ -338,24 +364,56 @@ export const FieldReportApp: React.FC = () => {
             placeholder="Enter report description in Hindi, Bengali, Spanish, or English..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full bg-dark-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-red-500"
+            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500 leading-relaxed"
             required
           />
         </div>
 
-        {/* Photo Upload Placeholder */}
-        <div className="border border-dashed border-gray-700 rounded-lg p-3 text-center text-xs text-gray-400 flex items-center justify-center gap-2 cursor-pointer hover:border-gray-500">
-          <Camera className="w-4 h-4 text-red-400" />
-          <span>Attach Photo / Video Evidence</span>
+        {/* Attached Photo Preview / Upload */}
+        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-3">
+            {attachedPhoto ? (
+              <img src={attachedPhoto} alt="Evidence" className="w-12 h-12 object-cover rounded-lg border border-slate-700" />
+            ) : (
+              <div className="w-12 h-12 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center text-slate-500">
+                <Camera className="w-5 h-5" />
+              </div>
+            )}
+            <div>
+              <div className="font-bold text-slate-200">Attached Visual Evidence</div>
+              <div className="text-[10px] text-slate-400 font-mono">
+                {attachedPhoto ? 'Photo evidence attached (+10% reliability bonus)' : 'No media attached'}
+              </div>
+            </div>
+          </div>
+
+          {attachedPhoto ? (
+            <button
+              type="button"
+              onClick={() => setAttachedPhoto(null)}
+              className="text-slate-400 hover:text-red-400 p-1 rounded"
+              title="Remove photo"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAttachedPhoto("https://images.unsplash.com/photo-1547683905-f686c993aae5?w=500")}
+              className="text-red-400 hover:text-red-300 font-semibold text-xs"
+            >
+              Attach Sample Photo
+            </button>
+          )}
         </div>
 
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-3 rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all"
+          className="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 text-white font-black text-xs py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-red-950 transition-all active:scale-95"
         >
           <Send className="w-4 h-4" />
-          {submitting ? 'PROCESSING BY GEMINI AI...' : 'SUBMIT DISASTER REPORT'}
+          <span>{submitting ? 'PROCESSING BY GEMINI AI ENGINE...' : 'TRANSMIT DISASTER REPORT'}</span>
         </button>
 
       </form>

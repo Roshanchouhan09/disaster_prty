@@ -9,6 +9,7 @@ export default {
     extend: {
       colors: {
         dark: {
+          950: '#060911',
           900: '#0B0F19',
           800: '#111827',
           700: '#1F2937',
@@ -23,8 +24,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace']
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'monospace']
       }
     },
   },
