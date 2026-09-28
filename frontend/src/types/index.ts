@@ -174,3 +174,55 @@ export interface SimulationStatus {
   incidents_active_count: number;
   messages: string[];
 }
+
+export type SOSEmergencyType = 'medical' | 'trapped' | 'flood' | 'structural_collapse' | 'fire' | 'general';
+export type SOSStatus = 'PENDING' | 'LOCATION_VERIFIED' | 'DISPATCHED' | 'ACTIVE' | 'RESOLVED' | 'CANCELLED';
+export type SOSSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM';
+
+export interface SOSContact {
+  name: string;
+  phone: string;
+  relation?: string;
+  notified?: boolean;
+  notified_at?: string;
+}
+
+export interface SOSAlert {
+  id: number;
+  sos_code: string;
+  user_id?: number;
+  reporter_name: string;
+  contact_phone: string;
+  emergency_type: SOSEmergencyType;
+  severity: SOSSeverity;
+  status: SOSStatus;
+  latitude: number;
+  longitude: number;
+  location_name: string;
+  message?: string;
+  emergency_contacts?: SOSContact[];
+  dispatched_service?: string;
+  dispatched_mission_id?: number;
+  dispatcher_notes?: string;
+  device_telemetry?: {
+    accuracy?: number;
+    battery?: number;
+    altitude?: number;
+    userAgent?: string;
+  };
+  incident_id?: number;
+  created_at: string;
+  updated_at: string;
+  resolved_at?: string;
+}
+
+export type SystemWorkflowState = 
+  | 'idle'
+  | 'sos_confirm'
+  | 'sos_activated'
+  | 'location_detecting'
+  | 'request_processing'
+  | 'notification_processing'
+  | 'emergency_active'
+  | 'resolved';
+

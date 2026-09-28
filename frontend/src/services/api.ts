@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { 
   User, Incident, Report, Resource, RescueMission, 
-  AnalyticsSummary, AuditLog, SimulationStatus, IncidentConflict 
+  AnalyticsSummary, AuditLog, SimulationStatus, IncidentConflict,
+  SOSAlert
 } from '../types';
 
 const API_BASE_URL = '/api';
@@ -159,6 +160,37 @@ export const simulationApi = {
   },
   setSpeed: async (speed: number): Promise<SimulationStatus> => {
     const res = await api.post('/simulation/speed', { speed });
+    return res.data;
+  }
+};
+
+export const sosApi = {
+  activate: async (data: Partial<SOSAlert>): Promise<SOSAlert> => {
+    const res = await api.post('/sos', data);
+    return res.data;
+  },
+  list: async (params?: { status?: string; emergency_type?: string }): Promise<SOSAlert[]> => {
+    const res = await api.get('/sos', { params });
+    return res.data;
+  },
+  getHistory: async (phone?: string): Promise<SOSAlert[]> => {
+    const res = await api.get('/sos/history', { params: { phone } });
+    return res.data;
+  },
+  getDetail: async (id: number): Promise<SOSAlert> => {
+    const res = await api.get(`/sos/${id}`);
+    return res.data;
+  },
+  updateStatus: async (id: number, status: string, notes?: string, dispatchedService?: string): Promise<SOSAlert> => {
+    const res = await api.patch(`/sos/${id}`, {
+      status,
+      dispatcher_notes: notes,
+      dispatched_service: dispatchedService
+    });
+    return res.data;
+  },
+  cancel: async (id: number, reason?: string): Promise<SOSAlert> => {
+    const res = await api.post(`/sos/${id}/cancel`, null, { params: { reason } });
     return res.data;
   }
 };

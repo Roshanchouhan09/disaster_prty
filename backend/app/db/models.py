@@ -210,3 +210,34 @@ class Hospital(Base):
     longitude = Column(Float, nullable=False)
     contact_number = Column(String(30), nullable=True)
     status = Column(String(30), default="OPERATIONAL") # OPERATIONAL, OVERWHELMED, INACCESSIBLE
+
+
+class SOSAlert(Base):
+    __tablename__ = "sos_alerts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    sos_code = Column(String(30), unique=True, index=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    reporter_name = Column(String(100), default="Citizen")
+    contact_phone = Column(String(30), nullable=False)
+    emergency_type = Column(String(50), default="general") # medical, trapped, flood, structural_collapse, fire, general
+    severity = Column(String(20), default="CRITICAL") # CRITICAL, HIGH, MEDIUM
+    status = Column(String(30), default="PENDING") # PENDING, LOCATION_VERIFIED, DISPATCHED, ACTIVE, RESOLVED, CANCELLED
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    location_name = Column(String(200), nullable=False, default="Detected Coordinates")
+    message = Column(Text, nullable=True)
+    emergency_contacts = Column(JSON, nullable=True)
+    dispatched_service = Column(String(100), nullable=True)
+    dispatched_mission_id = Column(Integer, ForeignKey("rescue_missions.id"), nullable=True)
+    dispatcher_notes = Column(Text, nullable=True)
+    device_telemetry = Column(JSON, nullable=True)
+    incident_id = Column(Integer, ForeignKey("incidents.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    resolved_at = Column(DateTime, nullable=True)
+
+    user = relationship("User")
+    incident = relationship("Incident")
+    mission = relationship("RescueMission")
+

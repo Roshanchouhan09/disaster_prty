@@ -225,3 +225,74 @@ $$d = 2R \cdot \arcsin\left(\sqrt{\sin^2\left(\frac{\Delta \text{lat}}{2}\right)
 * **High-Mortality Zones (Red Dashed Circles)**: Automatically projects a $1200\text{m}$ hazard perimeter around critical flash-flood and building collapse epicenters.
 * **Hospital ICU Tracker (Blue Markers)**: Displays live ICU bed availability and surgical trauma readiness.
 * **Emergency Relief Shelters (Purple Markers)**: Displays current capacity vs. occupancy for evacuation routing.
+
+---
+
+## 8. SOS Emergency System Architecture
+
+DISASTERFOG AI features a full-stack, real-world SOS emergency response system:
+
+```
+[CITIZEN DEVICE]
+       │
+       ▼ (Tap SOS Trigger)
+[CONFIRMATION BARRIER] ──(Cancel / 3s Intent Timer)──► Avoids Accidental Triggers
+       │
+       ▼ (User Confirms)
+[LOCATION ENGINE] ──────► Browser W3C GPS Coordinates + Accuracy Radius Detection
+       │
+       ▼ (POST /api/sos)
+[BACKEND REST ENGINE] ──► Deduplication Guard (409 if repeat alert within 5 mins)
+       │                  Auto-Generates Unique SOS-2026-XXXXX Code
+       │                  Links to Nearest Critical Incident (within 1.5km)
+       │                  Audit Log & Real-time WebSocket Broadcast
+       │
+       ▼
+[DISPATCH ABSTRACTION] ──► External Webhook Dispatch (EMERGENCY_DISPATCH_WEBHOOK_URL)
+                          External SMS Gateway (EMERGENCY_SMS_GATEWAY_URL)
+                          Tactical Units: NDRF Boat Squad / Ambulance / USAR
+
+[COMMAND CENTER HUD]  ──► Live Status: PENDING ➔ DISPATCHED ➔ ACTIVE ➔ RESOLVED
+```
+
+### SOS Endpoints Reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/sos` | Activate SOS distress beacon with coordinates, contacts, & phone |
+| `GET` | `/api/sos` | List all SOS beacons with status and emergency type filtering |
+| `GET` | `/api/sos/history` | Retrieve SOS history for the current user or telephone query |
+| `GET` | `/api/sos/{id}` | Inspect full telemetry and dispatch status of single SOS alert |
+| `PATCH` | `/api/sos/{id}` | Dispatcher updates status (DISPATCHED, ACTIVE, RESOLVED) & notes |
+| `POST` | `/api/sos/{id}/cancel` | User or operator cancels SOS beacon (False Alarm / Resolved) |
+
+---
+
+## 9. Interactive 3D System Architecture (Three.js)
+
+The platform provides a real-time, WebGL-accelerated 3D digital twin explaining the physical and cybernetic disaster management pipeline.
+
+### Pipeline Stages Represented:
+1. **Citizen Distress Device (USER)**: Captures emergency distress intent and user profile.
+2. **SOS Activation Beacon**: Double-confirmation barrier and unique code generation.
+3. **GPS & Satellite Telemetry**: High-precision coordinate triangulation and accuracy radius.
+4. **DISASTERFOG AI Engine Core**: Central rotating cybernetic core executing NLP classification, reliability scoring, and resource allocation.
+5. **EOC Tactical Command Hub**: Operations console receiving live WebSocket feeds.
+6. **Tactical Rescue Force (NDRF/SDRF)**: External SMS/Webhook dispatching ambulance, boat, and drone units.
+7. **Evacuation & Relief Shelter**: Evacuation routing and medical shelter admission.
+
+### Connection to Real Application State:
+The 3D visualization dynamically synchronizes with actual application state:
+* `idle`: Normal ambient harmonic heartbeat across nodes.
+* `sos_confirm`: Citizen terminal and SOS Beacon pulse with high-intensity warning glow.
+* `location_detecting`: Beacon projects laser beam upward to satellite telemetry node.
+* `request_processing`: Data packets accelerate along pipeline into AI Core; core rotates rapidly with luminous aura.
+* `notification_processing`: AI Core streams priority dispatch vectors to EOC Command and Tactical Units.
+* `emergency_active`: Rescue units highlight in vivid emerald/cyan with active pulse rings.
+* `resolved`: Serene green harmonic glow across all nodes.
+
+### Performance & Accessibility:
+* **Zero Dependencies Overhead**: Built with pure Three.js and custom math curves.
+* **Auto-Disposal**: Geometries, materials, textures, and animation frames are cleanly disposed on unmount to eliminate memory leaks.
+* **Graceful WebGL Fallback**: If hardware acceleration is unavailable, an accessible interactive stage-by-stage HUD appears automatically.
+

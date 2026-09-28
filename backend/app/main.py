@@ -15,7 +15,7 @@ from app.db.database import engine, Base, SessionLocal
 from app.db.seed_data import seed_database
 from app.websocket import manager
 
-from app.api import auth, events, reports, incidents, resources, missions, analytics, audit, simulation, conflicts
+from app.api import auth, events, reports, incidents, resources, missions, analytics, audit, simulation, conflicts, sos
 
 # Create Database tables
 Base.metadata.create_all(bind=engine)
@@ -52,6 +52,7 @@ app.include_router(incidents.router, prefix=settings.API_V1_STR)
 app.include_router(conflicts.router, prefix=settings.API_V1_STR)
 app.include_router(resources.router, prefix=settings.API_V1_STR)
 app.include_router(missions.router, prefix=settings.API_V1_STR)
+app.include_router(sos.router, prefix=settings.API_V1_STR)
 app.include_router(analytics.router, prefix=settings.API_V1_STR)
 app.include_router(audit.router, prefix=settings.API_V1_STR)
 app.include_router(simulation.router, prefix=settings.API_V1_STR)

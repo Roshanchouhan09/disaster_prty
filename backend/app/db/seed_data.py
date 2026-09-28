@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from app.db.models import (
     User, DisasterEvent, Report, Incident, IncidentConflict, Resource, RescueMission,
-    AuditLog, RoadSegment, Shelter, Hospital
+    AuditLog, RoadSegment, Shelter, Hospital, SOSAlert
 )
 from app.services.auth_service import get_password_hash
 from app.ai.classifier import AIClassifier
@@ -327,6 +327,43 @@ def seed_database(db: Session):
         timestamp=datetime.utcnow() - timedelta(minutes=15)
     )
     db.add_all([audit1, audit2])
+    db.commit()
+
+    # 8. SOS Alerts Seed Entries
+    sos1 = SOSAlert(
+        sos_code="SOS-2026-00001",
+        user_id=users[2].id,
+        reporter_name="Capt. Rahul Singh",
+        contact_phone="+91 98765 11001",
+        emergency_type="flood",
+        severity="CRITICAL",
+        status="ACTIVE",
+        latitude=LAT_BASE + 0.005,
+        longitude=LNG_BASE + 0.008,
+        location_name="Brahmaputra Lowland Causeway",
+        message="Flash flood breached secondary bund. 6 villagers stranded with livestock.",
+        emergency_contacts=[{"name": "EOC Dispatch", "phone": "+91 112", "relation": "Authority", "notified": True}],
+        dispatched_service="SDRF Flood Rescue Inflatable Boat Unit",
+        created_at=datetime.utcnow() - timedelta(minutes=45),
+        updated_at=datetime.utcnow() - timedelta(minutes=10)
+    )
+    sos2 = SOSAlert(
+        sos_code="SOS-2026-00002",
+        reporter_name="Pooja Sen (Citizen)",
+        contact_phone="+91 98112 44332",
+        emergency_type="medical",
+        severity="HIGH",
+        status="DISPATCHED",
+        latitude=LAT_BASE - 0.012,
+        longitude=LNG_BASE + 0.015,
+        location_name="Residential Complex B, Sector 9",
+        message="Elderly patient with oxygen dependency requires emergency evacuation before power cuts out.",
+        emergency_contacts=[{"name": "Son", "phone": "+91 98112 44333", "relation": "Family", "notified": True}],
+        dispatched_service="Emergency Medical Services (EMS) - Ambulance Rapid Unit",
+        created_at=datetime.utcnow() - timedelta(minutes=25),
+        updated_at=datetime.utcnow() - timedelta(minutes=5)
+    )
+    db.add_all([sos1, sos2])
     db.commit()
 
     print("Seeding completed successfully! DISASTERFOG AI is fully prepped with production-grade data.")

@@ -3,7 +3,7 @@ import {
   ShieldAlert, Activity, Map, FileText, Truck, BarChart3, 
   Smartphone, History, User, LogOut, Radio, PlayCircle, 
   Key, Sliders, Sparkles, Menu, X, ChevronDown, CheckCircle,
-  AlertTriangle, Bell
+  AlertTriangle, Bell, AlertOctagon, Cpu
 } from 'lucide-react';
 import { User as UserType, UserRole } from '../../types';
 
@@ -17,9 +17,11 @@ interface HeaderProps {
   onOpenApiKey: () => void;
   onOpenBriefing: () => void;
   onOpenWeights: () => void;
+  onOpenSOS: () => void;
   criticalCount?: number;
   unverifiedCount?: number;
   conflictsCount?: number;
+  activeSosCount?: number;
 }
 
 const AVAILABLE_ROLES: { role: UserRole; name: string; title: string }[] = [
@@ -40,15 +42,19 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenApiKey,
   onOpenBriefing,
   onOpenWeights,
+  onOpenSOS,
   criticalCount = 0,
   unverifiedCount = 0,
-  conflictsCount = 0
+  conflictsCount = 0,
+  activeSosCount = 0
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const navItems = [
     { id: 'dashboard', label: 'Command Center', icon: Activity, badge: null },
+    { id: 'sos', label: 'SOS Beacons', icon: AlertOctagon, badge: activeSosCount > 0 ? activeSosCount : null },
+    { id: 'workflow3d', label: '3D Pipeline', icon: Cpu, badge: null },
     { id: 'map', label: 'GIS Disaster Map', icon: Map, badge: null },
     { id: 'incidents', label: 'Incident Queue', icon: ShieldAlert, badge: criticalCount > 0 ? criticalCount : null },
     { id: 'reports', label: 'Field Submission', icon: Smartphone, badge: null },
@@ -138,6 +144,22 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Right Action Controls */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             
+            {/* EMERGENCY SOS TRIGGER BUTTON */}
+            <button
+              onClick={onOpenSOS}
+              className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-lg shadow-red-600/40 border border-red-400/50 pulse-critical transition-all active:scale-95"
+              title="Activate Emergency SOS Rescue System"
+              aria-label="Emergency SOS Dispatch"
+            >
+              <AlertOctagon className="w-4 h-4 text-white animate-pulse" />
+              <span className="tracking-wider">SOS</span>
+              {activeSosCount > 0 && (
+                <span className="bg-white text-red-700 text-[10px] font-black px-1.5 py-0.2 rounded-full ml-0.5">
+                  {activeSosCount}
+                </span>
+              )}
+            </button>
+
             {/* AI Briefing Button */}
             <button
               onClick={onOpenBriefing}
@@ -244,7 +266,20 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Drawer Navigation Menu */}
       {mobileMenuOpen && (
-        <div className="xl:hidden bg-slate-950 border-b border-slate-800 px-4 py-3 space-y-1 animate-in slide-in-from-top duration-200">
+        <div className="xl:hidden bg-slate-950 border-b border-slate-800 px-4 py-3 space-y-2 animate-in slide-in-from-top duration-200">
+          
+          {/* Prominent Mobile SOS Emergency Button */}
+          <button
+            onClick={() => {
+              onOpenSOS();
+              setMobileMenuOpen(false);
+            }}
+            className="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white font-black text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-red-950 pulse-critical active:scale-95 transition-all"
+          >
+            <AlertOctagon className="w-5 h-5 text-white animate-pulse" />
+            <span className="tracking-wider">ACTIVATE SOS DISTRESS BEACON</span>
+          </button>
+
           <div className="grid grid-cols-2 gap-1.5 pb-2">
             {navItems.map((item) => {
               const Icon = item.icon;

@@ -24,5 +24,16 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          three: ['three'],
+          vendor: ['react', 'react-dom', 'axios', 'recharts', 'leaflet', 'react-leaflet', 'lucide-react']
+        }
+      }
+    }
   }
 })

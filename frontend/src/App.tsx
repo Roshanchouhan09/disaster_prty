@@ -14,10 +14,13 @@ import { ResourceManagement } from './components/resources/ResourceManagement';
 import { RescueMissions } from './components/missions/RescueMissions';
 import { AnalyticsView } from './components/analytics/AnalyticsView';
 import { AuditLogsView } from './components/common/AuditLogsView';
-import { ToastProvider } from './components/common/Toast';
+import { ToastProvider, useToast } from './components/common/Toast';
+import { SOSModal } from './components/sos/SOSModal';
+import { SOSManagementView } from './components/sos/SOSManagementView';
+import { SystemWorkflow3D } from './components/visualization/SystemWorkflow3D';
 
-import { incidentsApi, analyticsApi, resourcesApi, missionsApi } from './services/api';
-import { Incident, AnalyticsSummary, Resource, RescueMission, User, IncidentConflict } from './types';
+import { incidentsApi, analyticsApi, resourcesApi, missionsApi, sosApi } from './services/api';
+import { Incident, AnalyticsSummary, Resource, RescueMission, User, IncidentConflict, SOSAlert, SystemWorkflowState } from './types';
 
 const DEFAULT_USER: User = {
   id: 2,
@@ -39,26 +42,33 @@ function MainApp() {
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [showBriefingModal, setShowBriefingModal] = useState(false);
   const [showWeightsModal, setShowWeightsModal] = useState(false);
+  const [showSOSModal, setShowSOSModal] = useState(false);
   const [selectedConflict, setSelectedConflict] = useState<IncidentConflict | null>(null);
+
+  // Workflow State for 3D System Architecture
+  const [workflowState, setWorkflowState] = useState<SystemWorkflowState>('idle');
 
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [resources, setResources] = useState<Resource[]>([]);
   const [missions, setMissions] = useState<RescueMission[]>([]);
+  const [sosAlerts, setSosAlerts] = useState<SOSAlert[]>([]);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
   const loadData = async () => {
     try {
-      const [incData, anaData, resData, misData] = await Promise.all([
+      const [incData, anaData, resData, misData, sosData] = await Promise.all([
         incidentsApi.list(),
         analyticsApi.getSummary(),
         resourcesApi.list(),
-        missionsApi.list()
+        missionsApi.list(),
+        sosApi.list()
       ]);
       setIncidents(incData);
       setAnalytics(anaData);
       setResources(resData);
       setMissions(misData);
+      setSosAlerts(sosData);
     } catch (err) {
       console.error('Data loading error:', err);
     }
@@ -78,7 +88,10 @@ function MainApp() {
       ws.onmessage = (evt) => {
         try {
           const msg = JSON.parse(evt.data);
-          if (['NEW_REPORT', 'INCIDENT_VERIFIED', 'MISSION_CREATED', 'SIMULATION_TICK'].includes(msg.type)) {
+          if ([
+            'NEW_REPORT', 'INCIDENT_VERIFIED', 'MISSION_CREATED', 
+            'SIMULATION_TICK', 'NEW_SOS_ALERT', 'SOS_STATUS_UPDATED'
+          ].includes(msg.type)) {
             loadData();
           }
         } catch (e) {
@@ -108,6 +121,10 @@ function MainApp() {
     return incidents.reduce((acc, curr) => acc + (curr.conflicts_count || 0), 0);
   }, [incidents]);
 
+  const activeSosCount = useMemo(() => {
+    return sosAlerts.filter(a => ['PENDING', 'LOCATION_VERIFIED', 'DISPATCHED', 'ACTIVE'].includes(a.status)).length;
+  }, [sosAlerts]);
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans antialiased selection:bg-red-500 selection:text-white">
       
@@ -127,9 +144,11 @@ function MainApp() {
         onOpenApiKey={() => setShowApiKeyModal(true)}
         onOpenBriefing={() => setShowBriefingModal(true)}
         onOpenWeights={() => setShowWeightsModal(true)}
+        onOpenSOS={() => setShowSOSModal(true)}
         criticalCount={criticalCount}
         unverifiedCount={unverifiedCount}
         conflictsCount={conflictsCount}
+        activeSosCount={activeSosCount}
       />
 
       {/* Main Body Layout */}
@@ -140,7 +159,25 @@ function MainApp() {
             incidents={incidents}
             onSelectIncident={(inc) => setSelectedIncident(inc)}
             onNavigate={(tab) => setActiveTab(tab)}
+            onOpenSOS={() => setShowSOSModal(true)}
+            activeSosCount={activeSosCount}
+            workflowState={workflowState}
+            onWorkflowStateChange={setWorkflowState}
           />
+        )}
+
+        {activeTab === 'sos' && (
+          <SOSManagementView onRefreshParent={loadData} />
+        )}
+
+        {activeTab === 'workflow3d' && (
+          <div className="space-y-4">
+            <SystemWorkflow3D
+              workflowState={workflowState}
+              onStateSelect={setWorkflowState}
+              className="min-h-[580px]"
+            />
+          </div>
         )}
 
         {activeTab === 'map' && (
@@ -183,6 +220,14 @@ function MainApp() {
           <AuditLogsView />
         )}
       </main>
+
+      {/* SOS Emergency Workflow Modal */}
+      <SOSModal
+        isOpen={showSOSModal}
+        onClose={() => setShowSOSModal(false)}
+        onSOSCreated={() => { loadData(); }}
+        onWorkflowStateChange={setWorkflowState}
+      />
 
       {/* Incident Detailed Inspection Modal */}
       {selectedIncident && (

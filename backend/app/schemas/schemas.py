@@ -195,3 +195,55 @@ class SimulationStatus(BaseModel):
     reports_generated_count: int
     incidents_active_count: int
     messages: List[str]
+
+
+# --- SOS EMERGENCY SCHEMAS ---
+class SOSContact(BaseModel):
+    name: str
+    phone: str
+    relation: Optional[str] = "Emergency Contact"
+    notified: bool = False
+    notified_at: Optional[str] = None
+
+class SOSCreateRequest(BaseModel):
+    reporter_name: Optional[str] = "Citizen"
+    contact_phone: str = Field(..., min_length=5, max_length=30)
+    emergency_type: str = "general" # medical, trapped, flood, structural_collapse, fire, general
+    severity: str = "CRITICAL" # CRITICAL, HIGH, MEDIUM
+    latitude: float
+    longitude: float
+    location_name: Optional[str] = "Detected Coordinates"
+    message: Optional[str] = None
+    emergency_contacts: Optional[List[SOSContact]] = []
+    device_telemetry: Optional[Dict[str, Any]] = None
+
+class SOSUpdateRequest(BaseModel):
+    status: Optional[str] = None # PENDING, LOCATION_VERIFIED, DISPATCHED, ACTIVE, RESOLVED, CANCELLED
+    dispatcher_notes: Optional[str] = None
+    dispatched_service: Optional[str] = None
+
+class SOSResponse(BaseModel):
+    id: int
+    sos_code: str
+    user_id: Optional[int] = None
+    reporter_name: str
+    contact_phone: str
+    emergency_type: str
+    severity: str
+    status: str
+    latitude: float
+    longitude: float
+    location_name: str
+    message: Optional[str] = None
+    emergency_contacts: Optional[List[Dict[str, Any]]] = None
+    dispatched_service: Optional[str] = None
+    dispatched_mission_id: Optional[int] = None
+    dispatcher_notes: Optional[str] = None
+    device_telemetry: Optional[Dict[str, Any]] = None
+    incident_id: Optional[int] = None
+    created_at: datetime
+    updated_at: datetime
+    resolved_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+

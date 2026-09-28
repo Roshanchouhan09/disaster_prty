@@ -16,6 +16,12 @@ class Settings(BaseSettings):
     MAP_PROVIDER_KEY: Optional[str] = os.getenv("MAP_PROVIDER_KEY", os.getenv("GOOGLE_MAPS_API_KEY", None))
     SATELLITE_API_KEY: Optional[str] = os.getenv("SATELLITE_API_KEY", None)
     
+    # Emergency Services Configuration
+    EMERGENCY_DISPATCH_WEBHOOK_URL: Optional[str] = os.getenv("EMERGENCY_DISPATCH_WEBHOOK_URL", None)
+    EMERGENCY_SMS_GATEWAY_URL: Optional[str] = os.getenv("EMERGENCY_SMS_GATEWAY_URL", None)
+    EMERGENCY_API_KEY: Optional[str] = os.getenv("EMERGENCY_API_KEY", None)
+    EMERGENCY_HELPLINE_NUMBER: str = os.getenv("EMERGENCY_HELPLINE_NUMBER", "112")
+
     # Priority score default weights (Admin configurable)
     WEIGHT_SEVERITY: float = 0.30
     WEIGHT_PEOPLE_AT_RISK: float = 0.25

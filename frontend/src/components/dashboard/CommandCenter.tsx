@@ -3,9 +3,10 @@ import {
   ShieldAlert, Activity, Users, AlertTriangle, CheckCircle, 
   Clock, Truck, Radio, MapPin, ArrowRight, Eye, AlertOctagon,
   Sparkles, Filter, CheckCircle2, XCircle, ArrowUpRight, Siren,
-  Smartphone
+  Smartphone, Cpu, ChevronDown, ChevronUp
 } from 'lucide-react';
-import { AnalyticsSummary, Incident } from '../../types';
+import { AnalyticsSummary, Incident, SystemWorkflowState } from '../../types';
+import { SystemWorkflow3D } from '../visualization/SystemWorkflow3D';
 
 interface CommandCenterProps {
   analytics: AnalyticsSummary | null;
@@ -13,6 +14,10 @@ interface CommandCenterProps {
   onSelectIncident: (inc: Incident) => void;
   onNavigate: (tab: string) => void;
   onQuickVerify?: (inc: Incident) => void;
+  onOpenSOS?: () => void;
+  activeSosCount?: number;
+  workflowState?: SystemWorkflowState;
+  onWorkflowStateChange?: (state: SystemWorkflowState) => void;
 }
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({
@@ -20,9 +25,14 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   incidents,
   onSelectIncident,
   onNavigate,
-  onQuickVerify
+  onQuickVerify,
+  onOpenSOS,
+  activeSosCount = 0,
+  workflowState = 'idle',
+  onWorkflowStateChange
 }) => {
   const [filterMode, setFilterMode] = useState<'ALL' | 'CRITICAL' | 'UNVERIFIED'>('ALL');
+  const [show3DPipeline, setShow3DPipeline] = useState(true);
 
   const safeIncidents = incidents || [];
   const criticalIncidents = safeIncidents.filter(i => i?.severity === 'CRITICAL' || i?.is_high_mortality_zone);
@@ -51,6 +61,11 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               <span className="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded tracking-widest uppercase shadow">
                 DEFCON LEVEL 1 EMERGENCY
               </span>
+              {activeSosCount > 0 && (
+                <span className="bg-rose-500 text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded animate-pulse">
+                  {activeSosCount} LIVE SOS SIGNALS
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-300 mt-1 max-w-2xl">
               North River Administrative District — Combined Seismic Tremor & High-Volume River Embankment Breach. Multi-agency triage in effect.
@@ -58,15 +73,67 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 z-10 w-full md:w-auto justify-end">
+        <div className="flex items-center gap-2.5 z-10 w-full md:w-auto justify-end flex-wrap sm:flex-nowrap">
+          {onOpenSOS && (
+            <button
+              onClick={onOpenSOS}
+              className="w-full sm:w-auto bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-red-950 transition-all pulse-critical active:scale-95"
+            >
+              <AlertOctagon className="w-4 h-4 text-white animate-pulse" />
+              <span>TRIGGER SOS RESCUE</span>
+            </button>
+          )}
+
           <button
             onClick={() => onNavigate('map')}
-            className="w-full md:w-auto bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-red-950 transition-all active:scale-95"
+            className="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95"
           >
-            <span>LIVE GIS SPATIAL MAP</span>
+            <span>LIVE GIS MAP</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
+      </div>
+
+      {/* Embedded 3D System Workflow Architecture Showcase */}
+      <div className="glass-panel rounded-2xl border border-purple-500/30 overflow-hidden shadow-2xl bg-slate-900/60">
+        <div className="p-3.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Cpu className="w-4 h-4 text-purple-400" />
+            <h3 className="text-xs sm:text-sm font-bold text-white tracking-wide">
+              REAL-TIME 3D INTELLIGENCE PIPELINE & RESCUE FLOW
+            </h3>
+            <span className="text-[10px] font-mono bg-purple-950 text-purple-300 px-2 py-0.5 rounded border border-purple-500/30 hidden sm:inline">
+              WebGL Accelerated
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onNavigate('workflow3d')}
+              className="text-xs text-purple-400 hover:text-purple-300 font-bold px-2 py-1 rounded hover:bg-purple-950/40 transition-colors flex items-center gap-1"
+            >
+              <span>Full Screen</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setShow3DPipeline(!show3DPipeline)}
+              className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 transition-colors"
+              title={show3DPipeline ? 'Collapse 3D Visualizer' : 'Expand 3D Visualizer'}
+            >
+              {show3DPipeline ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+
+        {show3DPipeline && (
+          <div className="p-2 sm:p-3">
+            <SystemWorkflow3D
+              workflowState={workflowState}
+              onStateSelect={onWorkflowStateChange}
+              className="h-[380px] sm:h-[440px]"
+            />
+          </div>
+        )}
       </div>
 
       {/* KPI Cards Grid */}
