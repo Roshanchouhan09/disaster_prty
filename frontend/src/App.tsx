@@ -152,7 +152,7 @@ function MainApp() {
       />
 
       {/* Main Body Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="flex-1 w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-5 sm:py-6">
         {activeTab === 'dashboard' && (
           <CommandCenter
             analytics={analytics}
@@ -268,7 +268,7 @@ function MainApp() {
 
       {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-950/80 py-5 text-center text-xs text-slate-400 font-mono">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="w-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>DISASTERFOG AI &copy; 2026 Emergency Operations Command</span>
           <span className="text-slate-400">Production-Ready AI Decision Intelligence Platform</span>
         </div>

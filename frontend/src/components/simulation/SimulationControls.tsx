@@ -110,8 +110,8 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({ onSimula
 
   return (
     <>
-      <div className="bg-slate-900 border-b border-amber-500/30 px-4 py-2.5 shadow-xl">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+      <div className="bg-slate-900 border-b border-amber-500/30 px-2 sm:px-4 py-2.5 shadow-xl">
+        <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
           
           {/* Left Status & Scenario Info */}
           <div className="flex items-center gap-2.5 w-full md:w-auto">

@@ -3,10 +3,9 @@ import {
   ShieldAlert, Activity, Users, AlertTriangle, CheckCircle, 
   Clock, Truck, Radio, MapPin, ArrowRight, Eye, AlertOctagon,
   Sparkles, Filter, CheckCircle2, XCircle, ArrowUpRight, Siren,
-  Smartphone, Cpu, ChevronDown, ChevronUp
+  Smartphone, Cpu, Layers
 } from 'lucide-react';
 import { AnalyticsSummary, Incident, SystemWorkflowState } from '../../types';
-import { SystemWorkflow3D } from '../visualization/SystemWorkflow3D';
 
 interface CommandCenterProps {
   analytics: AnalyticsSummary | null;
@@ -32,7 +31,6 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   onWorkflowStateChange
 }) => {
   const [filterMode, setFilterMode] = useState<'ALL' | 'CRITICAL' | 'UNVERIFIED'>('ALL');
-  const [show3DPipeline, setShow3DPipeline] = useState(true);
 
   const safeIncidents = incidents || [];
   const criticalIncidents = safeIncidents.filter(i => i?.severity === 'CRITICAL' || i?.is_high_mortality_zone);
@@ -94,53 +92,44 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         </div>
       </div>
 
-      {/* Embedded 3D System Workflow Architecture Showcase */}
-      <div className="glass-panel rounded-2xl border border-purple-500/30 overflow-hidden shadow-2xl bg-slate-900/60">
-        <div className="p-3.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Cpu className="w-4 h-4 text-purple-400" />
-            <h3 className="text-xs sm:text-sm font-bold text-white tracking-wide">
-              REAL-TIME 3D INTELLIGENCE PIPELINE & RESCUE FLOW
-            </h3>
-            <span className="text-[10px] font-mono bg-purple-950 text-purple-300 px-2 py-0.5 rounded border border-purple-500/30 hidden sm:inline">
-              WebGL Accelerated
+      {/* Active SOS Triage Banner if beacons exist */}
+      {activeSosCount > 0 && (
+        <div className="bg-gradient-to-r from-red-950/80 via-rose-950/50 to-slate-900 border border-red-500/50 rounded-xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg shadow-red-950/30">
+          <div className="flex items-center gap-3">
+            <span className="relative flex h-3 w-3 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
             </span>
+            <div>
+              <div className="text-xs font-black text-red-300 uppercase tracking-wider flex items-center gap-2">
+                <span>PRIORITY 1 RESCUE BEACONS ACTIVE</span>
+                <span className="bg-red-600 text-white text-[10px] font-mono px-1.5 py-0.5 rounded font-bold">
+                  {activeSosCount} PENDING
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                Incoming geo-tagged distress telemetry detected. Direct drone recon and medical dispatch available in the SOS Console.
+              </p>
+            </div>
           </div>
-
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
             <button
-              onClick={() => onNavigate('workflow3d')}
-              className="text-xs text-purple-400 hover:text-purple-300 font-bold px-2 py-1 rounded hover:bg-purple-950/40 transition-colors flex items-center gap-1"
+              onClick={() => onNavigate('sos')}
+              className="w-full sm:w-auto bg-red-600 hover:bg-red-500 text-white text-xs font-black px-3.5 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-md shadow-red-900/40"
             >
-              <span>Full Screen</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setShow3DPipeline(!show3DPipeline)}
-              className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 transition-colors"
-              title={show3DPipeline ? 'Collapse 3D Visualizer' : 'Expand 3D Visualizer'}
-            >
-              {show3DPipeline ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              <Radio className="w-3.5 h-3.5 animate-pulse" />
+              <span>Open SOS Console</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
+      )}
 
-        {show3DPipeline && (
-          <div className="p-2 sm:p-3">
-            <SystemWorkflow3D
-              workflowState={workflowState}
-              onStateSelect={onWorkflowStateChange}
-              className="h-[380px] sm:h-[440px]"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      {/* KPI Cards Grid - Expansive 7-metric Operational Architecture */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3.5">
         
         {/* KPI 1: Ingested Reports */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800/90 hover:border-blue-500/50 transition-all group">
+        <div className="glass-panel p-3.5 sm:p-4 rounded-xl border border-slate-800/90 hover:border-blue-500/50 transition-all group">
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold mb-1">
             <span className="truncate">INGESTED REPORTS</span>
             <Activity className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
@@ -153,7 +142,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         </div>
 
         {/* KPI 2: Verified Incidents */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800/90 hover:border-emerald-500/50 transition-all group">
+        <div className="glass-panel p-3.5 sm:p-4 rounded-xl border border-slate-800/90 hover:border-emerald-500/50 transition-all group">
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold mb-1">
             <span className="truncate">VERIFIED INCIDENTS</span>
             <CheckCircle className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
@@ -165,7 +154,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         </div>
 
         {/* KPI 3: Critical Mortality Zones */}
-        <div className="glass-panel p-4 rounded-xl border border-red-500/50 bg-red-950/20 transition-all pulse-critical group">
+        <div className="glass-panel p-3.5 sm:p-4 rounded-xl border border-red-500/50 bg-red-950/20 transition-all pulse-critical group">
           <div className="flex items-center justify-between text-red-400 text-xs font-bold mb-1">
             <span className="truncate">CRITICAL ZONES</span>
             <ShieldAlert className="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" />
@@ -177,7 +166,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         </div>
 
         {/* KPI 4: Affected Population */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800/90 hover:border-amber-500/50 transition-all group">
+        <div className="glass-panel p-3.5 sm:p-4 rounded-xl border border-slate-800/90 hover:border-amber-500/50 transition-all group">
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold mb-1">
             <span className="truncate">PEOPLE AT RISK</span>
             <Users className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
@@ -191,7 +180,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         </div>
 
         {/* KPI 5: Rescue Operations */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800/90 hover:border-purple-500/50 transition-all group">
+        <div className="glass-panel p-3.5 sm:p-4 rounded-xl border border-slate-800/90 hover:border-purple-500/50 transition-all group">
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold mb-1">
             <span className="truncate">ACTIVE MISSIONS</span>
             <Truck className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
@@ -202,8 +191,30 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
           </div>
         </div>
 
-        {/* KPI 6: AI Confidence */}
-        <div className="glass-panel p-4 rounded-xl border border-slate-800/90 hover:border-cyan-500/50 transition-all group">
+        {/* KPI 6: Live SOS Beacons */}
+        <div 
+          onClick={() => onNavigate('sos')}
+          className={`glass-panel p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer group ${
+            activeSosCount > 0 
+              ? 'border-rose-500/60 bg-rose-950/20 hover:border-rose-400' 
+              : 'border-slate-800/90 hover:border-rose-500/50'
+          }`}
+        >
+          <div className="flex items-center justify-between text-slate-400 text-xs font-semibold mb-1">
+            <span className="truncate">ACTIVE SOS BEACONS</span>
+            <Radio className={`w-4 h-4 ${activeSosCount > 0 ? 'text-rose-400 animate-pulse' : 'text-slate-500'} group-hover:scale-110 transition-transform`} />
+          </div>
+          <div className={`text-2xl sm:text-3xl font-black font-mono ${activeSosCount > 0 ? 'text-rose-400' : 'text-slate-300'}`}>
+            {activeSosCount}
+          </div>
+          <div className="text-[10px] text-rose-300 mt-1.5 font-semibold flex items-center justify-between">
+            <span>{activeSosCount > 0 ? 'Live Telemetry' : 'Standby'}</span>
+            <span className="text-[9px] text-slate-400 group-hover:text-rose-300">View →</span>
+          </div>
+        </div>
+
+        {/* KPI 7: AI Confidence */}
+        <div className="glass-panel p-3.5 sm:p-4 rounded-xl border border-slate-800/90 hover:border-cyan-500/50 transition-all group">
           <div className="flex items-center justify-between text-slate-400 text-xs font-semibold mb-1">
             <span className="truncate">AI CONFIDENCE</span>
             <Sparkles className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
@@ -442,6 +453,29 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
               className="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 rounded-lg transition-colors shadow flex items-center justify-center gap-1.5"
             >
               <span>Open Field Submission Tool</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* 3D Digital Twin Pipeline Dedicated View Quick Launcher */}
+          <div className="bg-gradient-to-br from-purple-950/40 via-slate-900 to-slate-900 p-4 rounded-xl border border-purple-500/40 space-y-2.5 shadow-lg">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                <Cpu className="w-4 h-4 text-purple-400" />
+                3D Digital Twin Pipeline
+              </span>
+              <span className="bg-purple-600/30 text-purple-300 border border-purple-500/40 text-[9px] font-mono px-1.5 py-0.5 rounded uppercase font-bold">
+                Three.js WebGL
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-snug">
+              Real-time spatial visualization connecting SOS signals, AI multi-agent triage nodes, and tactical drone/ambulance dispatches.
+            </p>
+            <button 
+              onClick={() => onNavigate('workflow3d')}
+              className="w-full bg-slate-800 hover:bg-purple-700 hover:text-white border border-purple-500/30 text-purple-200 text-xs font-bold py-2 rounded-lg transition-all shadow flex items-center justify-center gap-1.5"
+            >
+              <span>Launch 3D Architecture Twin</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>
