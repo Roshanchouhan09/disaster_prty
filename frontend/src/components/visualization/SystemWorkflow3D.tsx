@@ -4,7 +4,8 @@ import {
   Play, Pause, RotateCcw, Eye, Info, Sparkles, 
   Layers, Radio, Shield, MapPin, Cpu, Truck, CheckCircle2,
   AlertOctagon, Compass, ZoomIn, ZoomOut, AlertTriangle,
-  Volume2, VolumeX, Video, Activity, Zap, Navigation
+  Volume2, VolumeX, Video, Activity, Zap, Navigation,
+  ChevronRight, ChevronLeft, Award, HelpCircle
 } from 'lucide-react';
 import { SystemWorkflowState } from '../../types';
 
@@ -19,9 +20,11 @@ interface NodeData {
   id: string;
   name: string;
   stageName: string;
+  shortTag: string;
   position: THREE.Vector3;
   color: number;
   activeStates: SystemWorkflowState[];
+  judgePitch: string;
   description: string;
   details: string[];
   telemetry: { label: string; value: string }[];
@@ -30,110 +33,160 @@ interface NodeData {
 const NODES_CONFIG: NodeData[] = [
   {
     id: 'user',
-    name: 'Citizen Distress Device',
-    stageName: '1. CITIZEN NODE',
-    position: new THREE.Vector3(-12, 0, 4),
+    name: 'Citizen Distress Smartphone',
+    stageName: '1. CITIZEN SOS',
+    shortTag: 'STEP 1: CITIZEN DISTRESS',
+    position: new THREE.Vector3(-14, 0, 4),
     color: 0x38bdf8, // light blue
     activeStates: ['sos_confirm', 'sos_activated'],
-    description: 'Citizen smartphone or offline mesh node captures emergency distress intent and field telemetry.',
+    judgePitch: 'Civilians trapped in floodwaters or collapsed structures trigger 1-click distress with zero internet requirement.',
+    description: 'Smartphone / offline wearable captures emergency distress intent and field telemetry.',
     details: ['Phone / Offline Mesh Beacon', 'Battery & Radio Monitored', 'Local Storage Cryptographic Guard'],
     telemetry: [
-      { label: 'Signal Strength', value: '-74 dBm (4G/LoRa)' },
-      { label: 'Device Battery', value: '88% Optimal' },
-      { label: 'Packet Ingestion', value: '1.2 KB Encrypted' }
+      { label: 'Signal Type', value: 'Offline LoRa / 4G Fallback' },
+      { label: 'Device Battery', value: '88% Monitored' },
+      { label: 'Payload Integrity', value: 'SHA-256 Verified' }
     ]
   },
   {
     id: 'sos_trigger',
-    name: 'SOS Activation Beacon',
-    stageName: '2. SOS ACTIVATION',
-    position: new THREE.Vector3(-7, 2, 0.5),
+    name: 'Cellular / LoRa Mesh Relay Tower',
+    stageName: '2. MESH RELAY',
+    shortTag: 'STEP 2: OFFLINE MESH RELAY',
+    position: new THREE.Vector3(-8.5, 2.5, 0.5),
     color: 0xef4444, // red
     activeStates: ['sos_confirm', 'sos_activated'],
+    judgePitch: 'Peer-to-peer LoRa mesh hops data across flooded valleys where telecom towers are down, eliminating duplicate panics.',
     description: 'Cryptographic double-confirmation barrier that eliminates false positives and generates unique incident seeds.',
-    details: ['Double-confirmation Barrier', 'Unique SOS-2026 Code Generated', 'Zero-Duplicate Geo Hashing'],
+    details: ['Zero-Tower Mesh Hopping', 'Unique SOS Code Generated', 'Deduplication Shield Active'],
     telemetry: [
-      { label: 'Deduplication Guard', value: 'Active (SHA-256)' },
-      { label: 'Triage Level', value: 'PRIORITY 1 (CRITICAL)' },
-      { label: 'Confidence Seed', value: '0.992 Authenticated' }
+      { label: 'Mesh Relay Hop', value: 'Node #4 -> Gateway #1' },
+      { label: 'Deduplication Guard', value: 'Active (Filters 95% Spam)' },
+      { label: 'Triage Level', value: 'PRIORITY 1 (CRITICAL)' }
     ]
   },
   {
     id: 'location',
-    name: 'GPS & Satellite Telemetry',
-    stageName: '3. SATELLITE & GPS',
-    position: new THREE.Vector3(-2, 5.5, -3),
+    name: 'NavIC / GPS Satellite Constellation',
+    stageName: '3. SATELLITE GPS',
+    shortTag: 'STEP 3: ORBITAL SATELLITE GPS',
+    position: new THREE.Vector3(-3, 6, -3.5),
     color: 0x0ea5e9, // sky cyan
     activeStates: ['location_detecting', 'request_processing'],
+    judgePitch: 'Multi-constellation orbital satellites lock sub-2m civilian coordinates and terrain elevation models.',
     description: 'Real-time multi-constellation orbital triangulation fusing W3C GPS, NavIC, and elevation maps.',
     details: ['NavIC / GPS Multi-Constellation', 'Accuracy Radius 1.4m', 'Terrain Elevation Map Match'],
     telemetry: [
-      { label: 'Satellites Locked', value: '11 Orbital Links' },
-      { label: 'HDOP Precision', value: '0.78 (Sub-2m CEP)' },
-      { label: 'GIS Elevation', value: '+54.2m ASL' }
+      { label: 'Constellation', value: 'ISRO NavIC + Sentinel-2' },
+      { label: 'Precision CEP', value: '1.4 meters radius' },
+      { label: 'GIS Elevation', value: '+54.2m River Embankment' }
     ]
   },
   {
     id: 'ai_core',
     name: 'DISASTERFOG AI Neural Engine',
-    stageName: '4. AI DECISION ENGINE',
-    position: new THREE.Vector3(2, 3, 0),
+    stageName: '4. AI DECISION CORE',
+    shortTag: 'STEP 4: AI NLP & FUSION BRAIN',
+    position: new THREE.Vector3(2.5, 3.2, 0),
     color: 0xa855f7, // purple
     activeStates: ['request_processing', 'notification_processing'],
+    judgePitch: 'The core AI brain: Transformer NLP reads multi-lingual reports, resolves conflicting rumors, and calculates high-mortality zones.',
     description: 'Transformer NLP neural models performing cross-report clustering, contradiction flagging, and casualty estimation.',
-    details: ['Multi-lingual NLP Severity Classifier', 'Bayesian Source Reliability Model', 'Triage Allocation Matrix'],
+    details: ['Multi-lingual NLP Severity Classifier', 'Rumor & Contradiction Resolver', 'High-Mortality Risk Predictor'],
     telemetry: [
-      { label: 'Inference Latency', value: '18.4ms FP16' },
-      { label: 'Mortality Risk Score', value: 'HIGH (0.89)' },
-      { label: 'Contradiction Check', value: 'Verified Zero Conflict' }
+      { label: 'NLP Inference', value: '14.2ms Multi-Lingual' },
+      { label: 'Casualty Estimate', value: '~850 Trapped Civilians' },
+      { label: 'Contradiction Check', value: '3 False Rumors Resolved' }
     ]
   },
   {
     id: 'eoc_hub',
-    name: 'Tactical EOC Command Console',
-    stageName: '5. EOC COMMAND CENTER',
-    position: new THREE.Vector3(7, 2, 2.5),
+    name: 'Tactical EOC Command Bunker',
+    stageName: '5. EOC COMMAND',
+    shortTag: 'STEP 5: EOC HUMAN-IN-THE-LOOP',
+    position: new THREE.Vector3(8, 2.2, 2.5),
     color: 0xf59e0b, // amber
     activeStates: ['notification_processing', 'emergency_active'],
-    description: 'Human-in-the-loop tactical dashboard streaming real-time WebSocket updates to incident commanders.',
+    judgePitch: 'Human-in-the-Loop governance: EOC commanders verify AI recommendations with real-time WebSocket live-sync.',
+    description: 'Tactical operations console verifying automated dispatches, tracking GIS maps, and maintaining immutable audit trails.',
     details: ['Live Dual-Channel WebSocket Stream', 'Controller Override Switch', 'Immutable Event Audit Trail'],
     telemetry: [
-      { label: 'Active EOC Operators', value: '8 Connected' },
-      { label: 'WS Latency', value: '12ms Broadcast' },
-      { label: 'DEFCON State', value: 'DEFCON 1 EMERGENCY' }
+      { label: 'Incident State', value: 'DEFCON 1 EMERGENCY' },
+      { label: 'Active Commanders', value: 'District EOC Team' },
+      { label: 'Decision SLA', value: 'Under 60 Seconds' }
     ]
   },
   {
     id: 'dispatch',
     name: 'Tactical Rescue Force (NDRF/SDRF)',
-    stageName: '6. TACTICAL DISPATCH',
-    position: new THREE.Vector3(12, 2.8, -2),
+    stageName: '6. TACTICAL NDRF',
+    shortTag: 'STEP 6: DRONE & RESCUE DISPATCH',
+    position: new THREE.Vector3(13.5, 2.8, -2),
     color: 0x10b981, // emerald
     activeStates: ['notification_processing', 'emergency_active'],
+    judgePitch: 'Automated multi-agency dispatch sends autonomous UAV reconnaissance drones, flood rescue boats, and trauma ambulances.',
     description: 'Multi-agency dispatch gateway triggering autonomous reconnaissance drones, rescue boats, and trauma teams.',
     details: ['Automated National 112 Protocol', 'Autonomous Drone Recon Dispatched', 'Trauma Ambulance GPS Link'],
     telemetry: [
-      { label: 'Assigned Unit', value: 'SDRF Alpha-6 Drone + Boat' },
-      { label: 'Air Recon ETA', value: '3.8 Minutes' },
-      { label: 'Telemetry Link', value: 'AES-256 Encrypted' }
+      { label: 'Deployed Units', value: 'NDRF Boat #4 + SDRF Drone' },
+      { label: 'Drone Airspeed', value: '62 km/h Searchlight' },
+      { label: 'ETA to Target', value: '3.4 Minutes' }
     ]
   },
   {
     id: 'safe_haven',
-    name: 'Evacuation Shelter & Medical Hub',
-    stageName: '7. EVACUATION & RELIEF',
-    position: new THREE.Vector3(15, 0.8, 3),
+    name: 'Evacuation Hospital & Safe Haven',
+    stageName: '7. RELIEF HAVEN',
+    shortTag: 'STEP 7: SAFE HAVEN & RELIEF',
+    position: new THREE.Vector3(17.5, 1.2, 3),
     color: 0x06b6d4, // cyan
     activeStates: ['emergency_active', 'resolved'],
+    judgePitch: 'Closed-loop resolution: Extricated civilians are admitted to relief camps with live bed and medical supply telemetry.',
     description: 'Safe extraction corridors, hospital triage intake, and operational emergency camp capacity tracking.',
     details: ['Shelter Capacity Verification', 'Direct Trauma Intake', 'Victim Status Resolution Protocol'],
     telemetry: [
-      { label: 'Shelter Capacity', value: '1,200 (68% Occupied)' },
-      { label: 'ICU Beds Available', value: '14 Ready' },
-      { label: 'Mission State', value: 'EXTRACTION VERIFIED' }
+      { label: 'Camp Capacity', value: '1,200 (68% Occupied)' },
+      { label: 'Trauma ICU Beds', value: '14 Available' },
+      { label: 'Outcome', value: 'Lives Saved & Documented' }
     ]
   }
 ];
+
+// Helper to create 3D Canvas Text Sprite (Billboards) that always face the camera
+function createTextSprite(tagText: string, nameText: string, colorHex: string): THREE.Sprite {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 160;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return new THREE.Sprite();
+
+  // Dark high-contrast translucent pill
+  ctx.fillStyle = 'rgba(10, 15, 30, 0.92)';
+  ctx.strokeStyle = colorHex;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.roundRect(10, 10, 492, 140, 24);
+  ctx.fill();
+  ctx.stroke();
+
+  // Tag Badge (e.g. 1. CITIZEN SOS)
+  ctx.font = 'bold 36px monospace';
+  ctx.fillStyle = colorHex;
+  ctx.textAlign = 'center';
+  ctx.fillText(tagText, 256, 68);
+
+  // Subtitle Name (e.g. Trapped Victim Phone)
+  ctx.font = 'bold 24px sans-serif';
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillText(nameText, 256, 116);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(4.8, 1.5, 1);
+  return sprite;
+}
 
 // Web Audio API feedback synthesizer
 const playSynthTone = (freq = 520, type: OscillatorType = 'sine', duration = 0.09) => {
@@ -163,13 +216,15 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
   isCompact = false
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [selectedNode, setSelectedNode] = useState<NodeData | null>(NODES_CONFIG[3]); // default to AI core
+  const [selectedNodeIndex, setSelectedNodeIndex] = useState<number>(3); // default to AI core (index 3)
   const [hoveredNode, setHoveredNode] = useState<NodeData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isJudgeTourActive, setIsJudgeTourActive] = useState(false);
   const [autoRotate, setAutoRotate] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [webglSupported, setWebglSupported] = useState(true);
-  const [cameraView, setCameraView] = useState<'overview' | 'citizen' | 'satellite' | 'ai' | 'dispatch' | 'shelter'>('overview');
+
+  const selectedNode = NODES_CONFIG[selectedNodeIndex] || NODES_CONFIG[3];
 
   // Three.js internal references
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -178,15 +233,17 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
   const nodesMeshMap = useRef<Map<string, THREE.Group>>(new Map());
   const particlesRef = useRef<THREE.Points | null>(null);
   const droneMeshRef = useRef<THREE.Group | null>(null);
+  const ambulanceMeshRef = useRef<THREE.Group | null>(null);
   const satelliteMeshRef = useRef<THREE.Group | null>(null);
   const radarSweepRef = useRef<THREE.Mesh | null>(null);
+  const citizenPulseRef = useRef<THREE.Mesh | null>(null);
   const animFrameId = useRef<number | null>(null);
 
   // Manual camera rotation state
   const isDragging = useRef(false);
   const prevMousePos = useRef({ x: 0, y: 0 });
-  const cameraAngle = useRef({ theta: 0.35, phi: 0.58, radius: 28 });
-  const targetLookAt = useRef(new THREE.Vector3(1.5, 2.2, 0));
+  const cameraAngle = useRef({ theta: 0.35, phi: 0.58, radius: 30 });
+  const targetLookAt = useRef(new THREE.Vector3(2.5, 2.2, 0));
 
   const updateCameraPosition = useCallback(() => {
     if (!cameraRef.current) return;
@@ -197,61 +254,70 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
     cameraRef.current.lookAt(targetLookAt.current);
   }, []);
 
+  const jumpToStage = useCallback((index: number) => {
+    if (index < 0 || index >= NODES_CONFIG.length) return;
+    setSelectedNodeIndex(index);
+    const targetNode = NODES_CONFIG[index];
+
+    // Trigger state change
+    const stateMap: SystemWorkflowState[] = [
+      'idle', 'sos_confirm', 'location_detecting',
+      'request_processing', 'notification_processing',
+      'emergency_active', 'resolved'
+    ];
+    onStateSelect?.(stateMap[index] || 'idle');
+
+    if (soundEnabled) playSynthTone(440 + index * 80, 'triangle', 0.1);
+
+    // Smoothly focus camera on this station
+    targetLookAt.current.copy(targetNode.position);
+    cameraAngle.current = {
+      theta: 0.35 - (index * 0.18),
+      phi: 0.62,
+      radius: 16
+    };
+    updateCameraPosition();
+  }, [onStateSelect, soundEnabled, updateCameraPosition]);
+
   const setViewPreset = (view: 'overview' | 'citizen' | 'satellite' | 'ai' | 'dispatch' | 'shelter') => {
-    setCameraView(view);
     if (soundEnabled) playSynthTone(640, 'triangle', 0.08);
 
     if (view === 'overview') {
-      targetLookAt.current.set(1.5, 2.2, 0);
-      cameraAngle.current = { theta: 0.35, phi: 0.58, radius: 28 };
+      targetLookAt.current.set(2.5, 2.2, 0);
+      cameraAngle.current = { theta: 0.35, phi: 0.58, radius: 30 };
     } else if (view === 'citizen') {
-      targetLookAt.current.copy(NODES_CONFIG[0].position);
-      cameraAngle.current = { theta: 0.85, phi: 0.65, radius: 14 };
+      jumpToStage(0);
+      return;
     } else if (view === 'satellite') {
-      targetLookAt.current.copy(NODES_CONFIG[2].position);
-      cameraAngle.current = { theta: 0.3, phi: 0.45, radius: 15 };
+      jumpToStage(2);
+      return;
     } else if (view === 'ai') {
-      targetLookAt.current.copy(NODES_CONFIG[3].position);
-      cameraAngle.current = { theta: 0.08, phi: 0.62, radius: 13 };
+      jumpToStage(3);
+      return;
     } else if (view === 'dispatch') {
-      targetLookAt.current.copy(NODES_CONFIG[5].position);
-      cameraAngle.current = { theta: -0.65, phi: 0.65, radius: 15 };
+      jumpToStage(5);
+      return;
     } else if (view === 'shelter') {
-      targetLookAt.current.copy(NODES_CONFIG[6].position);
-      cameraAngle.current = { theta: -0.95, phi: 0.7, radius: 14 };
+      jumpToStage(6);
+      return;
     }
     updateCameraPosition();
   };
 
-  // Automated Simulation Stepper
+  // Automated Judge Tour / Presentation Loop
   useEffect(() => {
-    if (!isPlaying) return;
-    const stages: SystemWorkflowState[] = [
-      'idle', 'sos_confirm', 'location_detecting', 
-      'request_processing', 'notification_processing', 
-      'emergency_active', 'resolved'
-    ];
-    let currentIndex = stages.indexOf(workflowState);
-    if (currentIndex < 0) currentIndex = 0;
+    if (!isPlaying && !isJudgeTourActive) return;
 
     const interval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % stages.length;
-      const nextState = stages[currentIndex];
-      onStateSelect?.(nextState);
-      if (soundEnabled) {
-        playSynthTone(400 + currentIndex * 90, 'sine', 0.12);
-      }
-      // Follow the active node with camera preset
-      if (currentIndex === 1) setViewPreset('citizen');
-      else if (currentIndex === 2) setViewPreset('satellite');
-      else if (currentIndex === 3) setViewPreset('ai');
-      else if (currentIndex === 4 || currentIndex === 5) setViewPreset('dispatch');
-      else if (currentIndex === 6) setViewPreset('shelter');
-      else setViewPreset('overview');
-    }, 2800);
+      setSelectedNodeIndex((prev) => {
+        const next = (prev + 1) % NODES_CONFIG.length;
+        jumpToStage(next);
+        return next;
+      });
+    }, 4200); // 4.2 seconds per stage gives judges time to read narration
 
     return () => clearInterval(interval);
-  }, [isPlaying, workflowState, onStateSelect, soundEnabled]);
+  }, [isPlaying, isJudgeTourActive, jumpToStage]);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -271,16 +337,16 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
     }
 
     // 2. Initialize Three.js Scene
-    const width = container.clientWidth || 900;
-    const height = container.clientHeight || 540;
+    const width = container.clientWidth || 1000;
+    const height = container.clientHeight || 580;
 
     const scene = new THREE.Scene();
     sceneRef.current = scene;
     scene.background = new THREE.Color(0x020617); // Deep Slate-950
-    scene.fog = new THREE.FogExp2(0x020617, 0.02);
+    scene.fog = new THREE.FogExp2(0x020617, 0.018);
 
     // Camera
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 150);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 160);
     cameraRef.current = camera;
     updateCameraPosition();
 
@@ -295,54 +361,54 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // 3. Ambient, Directional & Point Lights
-    const ambientLight = new THREE.AmbientLight(0x38bdf8, 0.65);
+    // 3. Ambient & Studio Lighting
+    const ambientLight = new THREE.AmbientLight(0x38bdf8, 0.7);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    dirLight.position.set(12, 24, 12);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.6);
+    dirLight.position.set(15, 30, 15);
     scene.add(dirLight);
 
-    const purplePointLight = new THREE.PointLight(0xa855f7, 3, 35);
-    purplePointLight.position.set(2, 5, 0);
+    const purplePointLight = new THREE.PointLight(0xa855f7, 3.5, 40);
+    purplePointLight.position.set(2.5, 5, 0);
     scene.add(purplePointLight);
 
-    const cyanPointLight = new THREE.PointLight(0x06b6d4, 2.5, 30);
-    cyanPointLight.position.set(-2, 6, -3);
+    const cyanPointLight = new THREE.PointLight(0x06b6d4, 3, 35);
+    cyanPointLight.position.set(-3, 6, -3.5);
     scene.add(cyanPointLight);
 
     // 4. Starfield & Cyber Dust Particles
-    const starCount = 350;
+    const starCount = 400;
     const starGeom = new THREE.BufferGeometry();
     const starPositions = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount * 3; i += 3) {
-      starPositions[i] = (Math.random() - 0.5) * 80;
-      starPositions[i + 1] = Math.random() * 30 + 1;
-      starPositions[i + 2] = (Math.random() - 0.5) * 80;
+      starPositions[i] = (Math.random() - 0.5) * 90;
+      starPositions[i + 1] = Math.random() * 35 + 1;
+      starPositions[i + 2] = (Math.random() - 0.5) * 90;
     }
     starGeom.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
     const starMat = new THREE.PointsMaterial({
       color: 0x94a3b8,
-      size: 0.18,
+      size: 0.22,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.55,
       blending: THREE.AdditiveBlending
     });
     const starPoints = new THREE.Points(starGeom, starMat);
     scene.add(starPoints);
 
     // 5. Cybernetic Holographic Ground with Concentric Radar Rings
-    const gridHelper = new THREE.GridHelper(50, 50, 0x334155, 0x0f172a);
+    const gridHelper = new THREE.GridHelper(60, 60, 0x334155, 0x0f172a);
     gridHelper.position.y = -1;
     scene.add(gridHelper);
 
     // Radar Concentric Range Rings
-    [8, 16, 24].forEach((radius) => {
-      const ringGeom = new THREE.RingGeometry(radius - 0.05, radius + 0.05, 64);
+    [10, 20, 30].forEach((radius) => {
+      const ringGeom = new THREE.RingGeometry(radius - 0.06, radius + 0.06, 64);
       const ringMat = new THREE.MeshBasicMaterial({
         color: 0x0ea5e9,
         transparent: true,
-        opacity: 0.22,
+        opacity: 0.24,
         side: THREE.DoubleSide
       });
       const ringMesh = new THREE.Mesh(ringGeom, ringMat);
@@ -352,11 +418,11 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
     });
 
     // Rotating Radar Sweep Sector
-    const radarSectorGeom = new THREE.CircleGeometry(24, 32, 0, Math.PI / 4);
+    const radarSectorGeom = new THREE.CircleGeometry(30, 32, 0, Math.PI / 4);
     const radarSectorMat = new THREE.MeshBasicMaterial({
       color: 0x38bdf8,
       transparent: true,
-      opacity: 0.07,
+      opacity: 0.08,
       side: THREE.DoubleSide
     });
     const radarSweepMesh = new THREE.Mesh(radarSectorGeom, radarSectorMat);
@@ -365,73 +431,208 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
     scene.add(radarSweepMesh);
     radarSweepRef.current = radarSweepMesh;
 
-    // 6. Build High-Tech 3D Workflow Nodes with Dual Gimbal Rings
+    // 6. Build High-Detail Procedural 3D Stations with Floating 3D Text Billboards
     const nodeMeshes = new Map<string, THREE.Group>();
 
-    NODES_CONFIG.forEach((config) => {
+    NODES_CONFIG.forEach((config, idx) => {
       const group = new THREE.Group();
       group.position.copy(config.position);
-      group.userData = { id: config.id, config };
+      group.userData = { id: config.id, config, index: idx };
 
-      // Core Geometric Shape
-      let geom: THREE.BufferGeometry;
-      if (config.id === 'ai_core') {
-        geom = new THREE.DodecahedronGeometry(1.4, 1);
-      } else if (config.id === 'location') {
-        geom = new THREE.OctahedronGeometry(1.2, 0);
+      // Floating 3D Text Billboard Sprite above node
+      const labelSprite = createTextSprite(
+        config.stageName,
+        config.name,
+        '#' + config.color.toString(16).padStart(6, '0')
+      );
+      labelSprite.position.set(0, 3.2, 0);
+      group.add(labelSprite);
+
+      // Station Specific 3D Models
+      if (config.id === 'user') {
+        // STATION 1: Citizen Smartphone & Distress Beacon
+        const phoneBody = new THREE.Mesh(
+          new THREE.BoxGeometry(0.9, 1.8, 0.12),
+          new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.1 })
+        );
+        const phoneScreen = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.75, 1.6),
+          new THREE.MeshBasicMaterial({ color: 0xef4444 }) // Glowing Red SOS Screen
+        );
+        phoneScreen.position.z = 0.07;
+        phoneBody.add(phoneScreen);
+        group.add(phoneBody);
+
+        // Citizen Silhouette
+        const citizenHead = new THREE.Mesh(
+          new THREE.SphereGeometry(0.35, 16, 16),
+          new THREE.MeshStandardMaterial({ color: 0x38bdf8 })
+        );
+        citizenHead.position.set(1.4, 0.9, 0);
+        const citizenBody = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.1, 0.45, 1.1, 8),
+          new THREE.MeshStandardMaterial({ color: 0x0284c7 })
+        );
+        citizenBody.position.set(1.4, 0.1, 0);
+        group.add(citizenHead);
+        group.add(citizenBody);
+
+        // Expanding Citizen SOS Shockwave Ring
+        const pulseGeom = new THREE.RingGeometry(0.2, 0.4, 32);
+        const pulseMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
+        const pulseMesh = new THREE.Mesh(pulseGeom, pulseMat);
+        pulseMesh.rotation.x = Math.PI / 2;
+        pulseMesh.position.y = -config.position.y - 0.96;
+        group.add(pulseMesh);
+        citizenPulseRef.current = pulseMesh;
+
       } else if (config.id === 'sos_trigger') {
-        geom = new THREE.IcosahedronGeometry(1.25, 0);
+        // STATION 2: Cellular / LoRa Mesh Relay Tower Mast
+        const towerGroup = new THREE.Group();
+        const mast = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.12, 0.6, 3.2, 4),
+          new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.3, wireframe: true })
+        );
+        towerGroup.add(mast);
+
+        // Red Aviation Warning Strobe Beacon at Mast Tip
+        const tipLight = new THREE.Mesh(
+          new THREE.SphereGeometry(0.2, 12, 12),
+          new THREE.MeshBasicMaterial({ color: 0xef4444 })
+        );
+        tipLight.position.y = 1.7;
+        towerGroup.add(tipLight);
+
+        // Microwave Relay Dishes
+        [-0.4, 0.4].forEach(xOff => {
+          const dish = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.35, 0.1, 0.15, 16),
+            new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.7 })
+          );
+          dish.rotation.z = Math.PI / 2;
+          dish.position.set(xOff, 0.8, 0);
+          towerGroup.add(dish);
+        });
+        group.add(towerGroup);
+
+      } else if (config.id === 'location') {
+        // STATION 3: Satellite Telemetry Ground Station & Laser Uplink
+        const dishPedestal = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.5, 0.8, 0.6, 12),
+          new THREE.MeshStandardMaterial({ color: 0x334155 })
+        );
+        const paraboDish = new THREE.Mesh(
+          new THREE.CylinderGeometry(1.2, 0.2, 0.4, 20),
+          new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.1 })
+        );
+        paraboDish.rotation.x = Math.PI / 3;
+        paraboDish.position.y = 0.6;
+        dishPedestal.add(paraboDish);
+        group.add(dishPedestal);
+
+      } else if (config.id === 'ai_core') {
+        // STATION 4: AI Decision Neural Brain
+        const brainCore = new THREE.Mesh(
+          new THREE.DodecahedronGeometry(1.5, 1),
+          new THREE.MeshStandardMaterial({
+            color: 0xa855f7,
+            roughness: 0.1,
+            metalness: 0.9,
+            emissive: 0xa855f7,
+            emissiveIntensity: 0.6
+          })
+        );
+        group.add(brainCore);
+
+        // Synaptic Orbital Nodes
+        for (let i = 0; i < 6; i++) {
+          const angle = (i / 6) * Math.PI * 2;
+          const syn = new THREE.Mesh(
+            new THREE.SphereGeometry(0.2, 12, 12),
+            new THREE.MeshBasicMaterial({ color: 0xc084fc })
+          );
+          syn.position.set(Math.cos(angle) * 2.2, Math.sin(angle) * 0.8, Math.sin(angle) * 2.2);
+          group.add(syn);
+        }
+
+      } else if (config.id === 'eoc_hub') {
+        // STATION 5: Tactical EOC Operations Bunker Platform
+        const bunkerBase = new THREE.Mesh(
+          new THREE.BoxGeometry(2.2, 0.4, 2.2),
+          new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8 })
+        );
+        // Multi-Monitor Holographic Console
+        [-0.7, 0, 0.7].forEach(x => {
+          const screen = new THREE.Mesh(
+            new THREE.BoxGeometry(0.55, 0.45, 0.05),
+            new THREE.MeshBasicMaterial({ color: 0xf59e0b })
+          );
+          screen.position.set(x, 0.6, 0.4);
+          screen.rotation.y = -x * 0.3;
+          bunkerBase.add(screen);
+        });
+        group.add(bunkerBase);
+
       } else if (config.id === 'dispatch') {
-        geom = new THREE.BoxGeometry(1.4, 1.2, 1.8);
-      } else if (config.id === 'safe_haven') {
-        geom = new THREE.CylinderGeometry(0.8, 1.3, 1.6, 6);
+        // STATION 6: Tactical Rescue Force Base (NDRF Ambulance & Flood Boat)
+        const baseMesh = new THREE.Mesh(
+          new THREE.BoxGeometry(2.4, 0.3, 2.4),
+          new THREE.MeshStandardMaterial({ color: 0x064e3b })
+        );
+        // NDRF Ambulance Model
+        const amb = new THREE.Group();
+        const ambBody = new THREE.Mesh(
+          new THREE.BoxGeometry(1.6, 0.8, 0.9),
+          new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 })
+        );
+        amb.add(ambBody);
+        // Strobe Flasher Lightbar
+        const strobe = new THREE.Mesh(
+          new THREE.BoxGeometry(0.5, 0.15, 0.2),
+          new THREE.MeshBasicMaterial({ color: 0xef4444 })
+        );
+        strobe.position.y = 0.48;
+        amb.add(strobe);
+        amb.position.set(0, 0.55, 0);
+        group.add(baseMesh);
+        group.add(amb);
+        ambulanceMeshRef.current = strobe;
+
       } else {
-        geom = new THREE.SphereGeometry(1.1, 28, 28);
+        // STATION 7: Relief Haven & Field Hospital
+        const havenGroup = new THREE.Group();
+        const shelterTent = new THREE.Mesh(
+          new THREE.ConeGeometry(1.6, 1.8, 4),
+          new THREE.MeshStandardMaterial({ color: 0x0891b2, roughness: 0.4 })
+        );
+        shelterTent.rotation.y = Math.PI / 4;
+        havenGroup.add(shelterTent);
+
+        // Glowing 3D Medical Cross (+)
+        const crossH = new THREE.Mesh(
+          new THREE.BoxGeometry(0.9, 0.25, 0.15),
+          new THREE.MeshBasicMaterial({ color: 0x10b981 })
+        );
+        const crossV = new THREE.Mesh(
+          new THREE.BoxGeometry(0.25, 0.9, 0.15),
+          new THREE.MeshBasicMaterial({ color: 0x10b981 })
+        );
+        crossH.position.set(0, 1.4, 0);
+        crossV.position.set(0, 1.4, 0);
+        havenGroup.add(crossH);
+        havenGroup.add(crossV);
+        group.add(havenGroup);
       }
 
-      const mat = new THREE.MeshStandardMaterial({
-        color: config.color,
-        roughness: 0.15,
-        metalness: 0.85,
-        emissive: config.color,
-        emissiveIntensity: 0.45
-      });
-
-      const mesh = new THREE.Mesh(geom, mat);
-      group.add(mesh);
-
-      // Primary Gimbal Outer Ring
-      const ring1Geom = new THREE.TorusGeometry(1.8, 0.04, 12, 40);
+      // Dual Gimbal Orbiting Rings for all nodes
+      const ring1Geom = new THREE.TorusGeometry(2.1, 0.04, 12, 40);
       const ring1Mat = new THREE.MeshBasicMaterial({ color: config.color, transparent: true, opacity: 0.65 });
       const ring1 = new THREE.Mesh(ring1Geom, ring1Mat);
       ring1.rotation.x = Math.PI / 2;
       group.add(ring1);
 
-      // Secondary Gimbal Counter-Rotating Ring
-      const ring2Geom = new THREE.TorusGeometry(1.5, 0.03, 10, 36);
-      const ring2Mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
-      const ring2 = new THREE.Mesh(ring2Geom, ring2Mat);
-      ring2.rotation.y = Math.PI / 3;
-      group.add(ring2);
-
-      // Ground Pulsing Projection Column
-      const lineGeom = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(0, -config.position.y - 1, 0)
-      ]);
-      const lineMat = new THREE.LineDashedMaterial({
-        color: config.color,
-        dashSize: 0.5,
-        gapSize: 0.25,
-        transparent: true,
-        opacity: 0.4
-      });
-      const dropLine = new THREE.Line(lineGeom, lineMat);
-      dropLine.computeLineDistances();
-      group.add(dropLine);
-
       // Ground Target Disc
-      const discGeom = new THREE.RingGeometry(0.6, 0.9, 24);
+      const discGeom = new THREE.RingGeometry(0.8, 1.2, 24);
       const discMat = new THREE.MeshBasicMaterial({ color: config.color, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
       const disc = new THREE.Mesh(discGeom, discMat);
       disc.rotation.x = Math.PI / 2;
@@ -450,13 +651,13 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
       const p1 = NODES_CONFIG[i].position;
       const p2 = NODES_CONFIG[i + 1].position;
       const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-      mid.y += 1.8; // graceful suspension arch
+      mid.y += 2.2; // graceful suspension arch
 
       const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
       const points = curve.getPoints(28);
       points.forEach(pt => pipelinePoints.push(pt));
 
-      const tubeGeom = new THREE.TubeGeometry(curve, 28, 0.08, 8, false);
+      const tubeGeom = new THREE.TubeGeometry(curve, 28, 0.09, 8, false);
       const tubeMat = new THREE.MeshBasicMaterial({
         color: 0x38bdf8,
         transparent: true,
@@ -467,7 +668,7 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
     }
 
     // 8. Animated High-Speed Data Flow Energy Packets
-    const particleCount = 260;
+    const particleCount = 280;
     const particleGeom = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     const particleColors = new Float32Array(particleCount * 3);
@@ -483,7 +684,6 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
       particlePositions[i * 3 + 1] = pt.y;
       particlePositions[i * 3 + 2] = pt.z;
 
-      // Color packet according to progress through the pipeline
       const c = new THREE.Color().setHSL(0.55 + particleProgress[i] * 0.4, 0.9, 0.65);
       particleColors[i * 3] = c.r;
       particleColors[i * 3 + 1] = c.g;
@@ -493,10 +693,10 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
     particleGeom.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
     particleGeom.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
     const particleMat = new THREE.PointsMaterial({
-      size: 0.32,
+      size: 0.36,
       vertexColors: true,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.92,
       blending: THREE.AdditiveBlending
     });
 
@@ -504,48 +704,51 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
     scene.add(particles);
     particlesRef.current = particles;
 
-    // 9. Overhead Tactical GPS Satellite
+    // 9. Overhead Tactical GPS Satellite with Volumetric Downlink Laser
     const satelliteGroup = new THREE.Group();
-    satelliteGroup.position.set(-2, 12, -3);
+    satelliteGroup.position.set(-3, 13, -3.5);
 
     const satBody = new THREE.Mesh(
-      new THREE.BoxGeometry(0.8, 0.8, 1.4),
+      new THREE.BoxGeometry(1.0, 1.0, 1.6),
       new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.2 })
     );
     satelliteGroup.add(satBody);
 
-    // Solar Wings
-    [-1.2, 1.2].forEach(offset => {
+    // Twin Blue Solar Wings
+    [-1.5, 1.5].forEach(offset => {
       const wing = new THREE.Mesh(
-        new THREE.BoxGeometry(1.6, 0.05, 0.8),
-        new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.6, roughness: 0.3 })
+        new THREE.BoxGeometry(1.8, 0.06, 0.9),
+        new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.7, roughness: 0.2 })
       );
       wing.position.x = offset;
       satelliteGroup.add(wing);
     });
 
-    // Satellite Laser Downlink Beam to Location Node
+    // Satellite Laser Downlink Beam to Location Station
     const satBeamGeom = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0, -6.5, 0)
+      new THREE.Vector3(0, -7.0, 0)
     ]);
-    const satBeamMat = new THREE.LineBasicMaterial({
+    const satBeamMat = new THREE.LineDashedMaterial({
       color: 0x38bdf8,
+      dashSize: 0.5,
+      gapSize: 0.2,
       transparent: true,
-      opacity: 0.5
+      opacity: 0.6
     });
     const satBeam = new THREE.Line(satBeamGeom, satBeamMat);
+    satBeam.computeLineDistances();
     satelliteGroup.add(satBeam);
 
     scene.add(satelliteGroup);
     satelliteMeshRef.current = satelliteGroup;
 
-    // 10. Autonomous Tactical Recon Drone Model
+    // 10. Autonomous Tactical Recon Drone Model with Searchlight Cone
     const droneGroup = new THREE.Group();
-    droneGroup.position.set(7, 4.5, 1);
+    droneGroup.position.set(13.5, 5.5, -2);
 
     const droneCore = new THREE.Mesh(
-      new THREE.SphereGeometry(0.4, 16, 16),
+      new THREE.SphereGeometry(0.45, 16, 16),
       new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.8, roughness: 0.2 })
     );
     droneGroup.add(droneCore);
@@ -563,7 +766,6 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
       arm.position.z = Math.sin(angle) * 0.45;
       droneGroup.add(arm);
 
-      // Spinning rotor disc
       const rotor = new THREE.Mesh(
         new THREE.RingGeometry(0.1, 0.35, 12),
         new THREE.MeshBasicMaterial({ color: 0x6ee7b7, transparent: true, opacity: 0.6, side: THREE.DoubleSide })
@@ -573,10 +775,22 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
       droneGroup.add(rotor);
     });
 
+    // Downward Volumetric Recon Searchlight Cone
+    const coneGeom = new THREE.ConeGeometry(1.6, 4.0, 16, 1, true);
+    const coneMat = new THREE.MeshBasicMaterial({
+      color: 0x34d399,
+      transparent: true,
+      opacity: 0.12,
+      side: THREE.DoubleSide
+    });
+    const searchlightCone = new THREE.Mesh(coneGeom, coneMat);
+    searchlightCone.position.y = -2.0;
+    droneGroup.add(searchlightCone);
+
     scene.add(droneGroup);
     droneMeshRef.current = droneGroup;
 
-    // 11. Raycasting for Interaction
+    // 11. Raycasting for Mouse Interaction
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
@@ -591,7 +805,7 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
 
       if (intersects.length > 0) {
         let rootGroup = intersects[0].object.parent;
-        while (rootGroup && !rootGroup.userData.id && rootGroup.parent) {
+        while (rootGroup && rootGroup.userData.index === undefined && rootGroup.parent) {
           rootGroup = rootGroup.parent;
         }
         if (rootGroup && rootGroup.userData.config) {
@@ -619,7 +833,7 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
         container.style.cursor = 'grab';
 
         // Treat small click as node selection
-        if (dx < 4 && dy < 4) {
+        if (dx < 5 && dy < 5) {
           const rect = container.getBoundingClientRect();
           mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
           mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -630,13 +844,11 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
 
           if (intersects.length > 0) {
             let rootGroup = intersects[0].object.parent;
-            while (rootGroup && !rootGroup.userData.id && rootGroup.parent) {
+            while (rootGroup && rootGroup.userData.index === undefined && rootGroup.parent) {
               rootGroup = rootGroup.parent;
             }
-            if (rootGroup && rootGroup.userData.config) {
-              const nodeCfg = rootGroup.userData.config as NodeData;
-              setSelectedNode(nodeCfg);
-              if (soundEnabled) playSynthTone(580, 'sine', 0.08);
+            if (rootGroup && rootGroup.userData.index !== undefined) {
+              jumpToStage(rootGroup.userData.index);
             }
           }
         }
@@ -656,7 +868,7 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      cameraAngle.current.radius = Math.max(10, Math.min(48, cameraAngle.current.radius + e.deltaY * 0.02));
+      cameraAngle.current.radius = Math.max(10, Math.min(50, cameraAngle.current.radius + e.deltaY * 0.02));
       updateCameraPosition();
     };
 
@@ -689,7 +901,7 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
 
       // Continuous cinematic orbit if enabled and not currently dragging
       if (autoRotate && !isDragging.current) {
-        cameraAngle.current.theta += delta * 0.08;
+        cameraAngle.current.theta += delta * 0.06;
         updateCameraPosition();
       }
 
@@ -698,52 +910,45 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
         radarSweepRef.current.rotation.z += delta * 0.75;
       }
 
+      // Pulse citizen SOS wave ring
+      if (citizenPulseRef.current) {
+        const s = 1 + (time * 1.5 % 3.0);
+        citizenPulseRef.current.scale.set(s, s, s);
+        (citizenPulseRef.current.material as THREE.MeshBasicMaterial).opacity = Math.max(0, 0.8 - (s / 3.0));
+      }
+
       // Rotate Satellite
       if (satelliteMeshRef.current) {
         satelliteMeshRef.current.rotation.y += delta * 0.2;
-        satelliteMeshRef.current.position.y = 12 + Math.sin(time * 1.5) * 0.4;
+        satelliteMeshRef.current.position.y = 13 + Math.sin(time * 1.5) * 0.4;
       }
 
       // Fly Autonomous Recon Drone
       if (droneMeshRef.current) {
-        const flightRadius = 4.2;
-        droneMeshRef.current.position.x = 9 + Math.cos(time * 0.8) * flightRadius;
-        droneMeshRef.current.position.z = Math.sin(time * 0.8) * flightRadius;
-        droneMeshRef.current.position.y = 4.2 + Math.sin(time * 2.5) * 0.3;
-        droneMeshRef.current.rotation.y = time * 0.8 + Math.PI / 2;
+        const flightRadius = 4.0;
+        droneMeshRef.current.position.x = 13.5 + Math.cos(time * 0.9) * flightRadius;
+        droneMeshRef.current.position.z = -2 + Math.sin(time * 0.9) * flightRadius;
+        droneMeshRef.current.position.y = 5.2 + Math.sin(time * 2.5) * 0.35;
+        droneMeshRef.current.rotation.y = time * 0.9 + Math.PI / 2;
       }
 
-      // Animate Nodes & Dual Gimbal Rings
+      // Strobe ambulance flashing light
+      if (ambulanceMeshRef.current) {
+        (ambulanceMeshRef.current.material as THREE.MeshBasicMaterial).color.setHex(
+          Math.sin(time * 10) > 0 ? 0xef4444 : 0x3b82f6
+        );
+      }
+
+      // Animate Nodes & Floating Billboards
       nodeMeshes.forEach((group) => {
         const cfg = group.userData.config as NodeData;
-        const isStateActive = cfg?.activeStates.includes(workflowState);
+        const isSelected = group.userData.index === selectedNodeIndex;
 
-        // Core mesh rotation
-        const core = group.children[0] as THREE.Mesh;
-        if (core) {
-          core.rotation.y += delta * (isStateActive ? 1.6 : 0.4);
-          core.rotation.x += delta * 0.25;
-
-          if (isStateActive) {
-            const scale = 1 + Math.sin(time * 6) * 0.14;
-            core.scale.set(scale, scale, scale);
-            (core.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.85 + Math.sin(time * 6) * 0.4;
-          } else {
-            core.scale.set(1, 1, 1);
-            (core.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.35;
-          }
-        }
-
-        // Gimbal Ring 1
-        const ring1 = group.children[1] as THREE.Mesh;
-        if (ring1) {
-          ring1.rotation.z += delta * (isStateActive ? 1.2 : 0.6);
-        }
-
-        // Gimbal Ring 2
-        const ring2 = group.children[2] as THREE.Mesh;
-        if (ring2) {
-          ring2.rotation.x += delta * (isStateActive ? -1.4 : -0.5);
+        // Animate Rings
+        const ring = group.children[group.children.length - 2] as THREE.Mesh;
+        if (ring) {
+          ring.rotation.z += delta * (isSelected ? 1.5 : 0.6);
+          ring.scale.setScalar(isSelected ? 1.15 + Math.sin(time * 5) * 0.08 : 1.0);
         }
       });
 
@@ -790,11 +995,11 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
       });
       renderer.dispose();
     };
-  }, [workflowState, updateCameraPosition, autoRotate]);
+  }, [updateCameraPosition, autoRotate, jumpToStage, selectedNodeIndex]);
 
   const handleZoom = (direction: 'in' | 'out') => {
     const delta = direction === 'in' ? -3 : 3;
-    cameraAngle.current.radius = Math.max(10, Math.min(48, cameraAngle.current.radius + delta));
+    cameraAngle.current.radius = Math.max(10, Math.min(50, cameraAngle.current.radius + delta));
     updateCameraPosition();
     if (soundEnabled) playSynthTone(700, 'sine', 0.05);
   };
@@ -806,102 +1011,92 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
   return (
     <div className={`relative bg-slate-950 border border-purple-500/40 rounded-2xl overflow-hidden shadow-2xl flex flex-col ${className}`}>
       
-      {/* 3D Top Tactical HUD Bar */}
-      <div className="bg-slate-900/90 backdrop-blur-md px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 z-10">
+      {/* Top Judges' Architecture Banner & Controls */}
+      <div className="bg-slate-900/95 backdrop-blur-md px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 z-10">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-purple-600/30 text-purple-400 border border-purple-500/50 shadow-md shadow-purple-950">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-950">
             <Cpu className="w-5 h-5 animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xs sm:text-sm font-black text-white tracking-wide flex items-center gap-1.5">
-                <span>3D INTELLIGENCE PIPELINE DIGITAL TWIN</span>
+              <h3 className="text-xs sm:text-sm font-black text-white tracking-wide">
+                DISASTERFOG AI — END-TO-END 3D SYSTEM ARCHITECTURE
               </h3>
-              <span className="text-[10px] bg-purple-600 text-white font-mono px-2 py-0.5 rounded font-bold uppercase shadow">
-                WebGL 2.0
+              <span className="text-[10px] bg-emerald-600 text-white font-mono px-2 py-0.5 rounded font-black uppercase shadow">
+                IIT GHY EVALUATION READY
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-2">
-              <span>Pipeline Stage:</span>
-              <span className="text-emerald-400 font-bold uppercase tracking-wider bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-500/30">
-                {workflowState}
-              </span>
+            <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+              Live Stage {selectedNodeIndex + 1}/7: <span className="text-purple-400 font-bold uppercase">{selectedNode.stageName}</span> — <span className="text-slate-400">{selectedNode.name}</span>
             </p>
           </div>
         </div>
 
-        {/* View Camera Presets & Interactive Stepper */}
-        <div className="flex items-center gap-1.5 flex-wrap">
+        {/* Guided Jury Tour & Simulation Buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
           
-          {/* Auto Simulation Stepper Button */}
+          {/* Judges' Guided Tour Button */}
           <button
             onClick={() => {
-              setIsPlaying(!isPlaying);
-              if (soundEnabled) playSynthTone(isPlaying ? 350 : 800, 'triangle', 0.1);
+              const nextState = !isJudgeTourActive;
+              setIsJudgeTourActive(nextState);
+              setIsPlaying(false);
+              if (soundEnabled) playSynthTone(nextState ? 780 : 380, 'triangle', 0.12);
             }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 shadow ${
-              isPlaying
-                ? 'bg-amber-600 text-white animate-pulse'
-                : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white'
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shadow-lg ${
+              isJudgeTourActive
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white ring-2 ring-emerald-400 animate-pulse'
+                : 'bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white'
             }`}
           >
-            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
-            <span>{isPlaying ? 'PAUSE AI SIMULATION' : 'RUN AI SIMULATION'}</span>
+            <Award className="w-3.5 h-3.5 fill-current" />
+            <span>{isJudgeTourActive ? 'JURY TOUR ACTIVE (AUTO-STEP)' : 'START JUDGE ARCHITECTURE TOUR'}</span>
           </button>
+
+          {/* Stepper Navigation (< / >) */}
+          <div className="flex items-center gap-1 bg-slate-800 p-0.5 rounded-lg border border-slate-700">
+            <button
+              onClick={() => {
+                const prev = (selectedNodeIndex - 1 + NODES_CONFIG.length) % NODES_CONFIG.length;
+                jumpToStage(prev);
+              }}
+              className="p-1 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors"
+              title="Previous Stage"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-[11px] font-mono px-2 font-bold text-purple-300">
+              {selectedNodeIndex + 1}/{NODES_CONFIG.length}
+            </span>
+            <button
+              onClick={() => {
+                const next = (selectedNodeIndex + 1) % NODES_CONFIG.length;
+                jumpToStage(next);
+              }}
+              className="p-1 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors"
+              title="Next Stage"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
 
           <div className="h-4 w-px bg-slate-700 mx-1 hidden sm:block"></div>
 
-          {/* Camera Perspective Presets */}
+          {/* Camera Preset Quick Jumps */}
           <button
             onClick={() => setViewPreset('overview')}
-            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-colors ${
-              cameraView === 'overview' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
+            className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors"
           >
             Overview
           </button>
-          <button
-            onClick={() => setViewPreset('citizen')}
-            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-colors ${
-              cameraView === 'citizen' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            Citizen SOS
-          </button>
-          <button
-            onClick={() => setViewPreset('satellite')}
-            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-colors ${
-              cameraView === 'satellite' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            Satellite GPS
-          </button>
-          <button
-            onClick={() => setViewPreset('ai')}
-            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-colors ${
-              cameraView === 'ai' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            AI Engine
-          </button>
-          <button
-            onClick={() => setViewPreset('dispatch')}
-            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-colors ${
-              cameraView === 'dispatch' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-            }`}
-          >
-            Tactical Drone
-          </button>
 
-          <div className="h-4 w-px bg-slate-700 mx-1 hidden sm:block"></div>
-
-          {/* Cinematic Auto-Rotate */}
+          {/* Cinematic 360 Toggle */}
           <button
             onClick={() => setAutoRotate(!autoRotate)}
-            className={`p-1.5 rounded-md transition-colors ${
+            className={`p-1.5 rounded transition-colors ${
               autoRotate ? 'bg-purple-600/40 text-purple-300 border border-purple-500/50' : 'bg-slate-800 text-slate-400'
             }`}
-            title={autoRotate ? 'Disable Cinematic 360° Cam' : 'Enable Cinematic 360° Cam'}
+            title={autoRotate ? 'Pause 360° Cam' : 'Enable 360° Cam'}
           >
             <Video className="w-3.5 h-3.5" />
           </button>
@@ -909,15 +1104,13 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
           {/* Sound FX Toggle */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className={`p-1.5 rounded-md transition-colors ${
-              soundEnabled ? 'bg-slate-800 text-slate-200' : 'bg-slate-800 text-slate-500'
-            }`}
-            title={soundEnabled ? 'Mute Audio FX' : 'Enable Audio FX'}
+            className="p-1.5 rounded bg-slate-800 text-slate-300 hover:text-white transition-colors"
+            title={soundEnabled ? 'Mute Audio' : 'Unmute Audio'}
           >
-            {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-cyan-400" /> : <VolumeX className="w-3.5 h-3.5" />}
+            {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-cyan-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
           </button>
 
-          {/* Zoom In & Out */}
+          {/* Zoom & Reset */}
           <button
             onClick={() => handleZoom('in')}
             className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
@@ -939,11 +1132,28 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
+
+        </div>
+      </div>
+
+      {/* Prominent High-Impact Judges' Concept Pitch Bar (Center Top) */}
+      <div className="bg-gradient-to-r from-purple-950/90 via-slate-900/95 to-slate-950/90 border-b border-purple-500/30 px-4 py-2.5 flex items-center justify-between gap-3 text-xs z-10">
+        <div className="flex items-center gap-2.5">
+          <span className="bg-purple-600 text-white font-mono text-[10px] font-black px-2 py-0.5 rounded tracking-wider uppercase shrink-0 shadow">
+            {selectedNode.shortTag}
+          </span>
+          <p className="text-slate-100 font-semibold text-xs sm:text-sm tracking-wide">
+            {selectedNode.judgePitch}
+          </p>
+        </div>
+        <div className="hidden md:flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 shrink-0">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Live Digital Twin Active</span>
         </div>
       </div>
 
       {/* 3D Canvas Mount or WebGL Fallback */}
-      <div className="relative flex-1 min-h-[440px] sm:min-h-[580px] bg-slate-950 flex items-center justify-center">
+      <div className="relative flex-1 min-h-[460px] sm:min-h-[600px] bg-slate-950 flex items-center justify-center">
         {webglSupported ? (
           <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing select-none" />
         ) : (
@@ -952,29 +1162,21 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
             <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto" />
             <h4 className="text-base font-bold text-white">3D Hardware Acceleration Unavailable</h4>
             <p className="text-xs text-slate-400">
-              WebGL is disabled or unsupported on this device. The system architecture workflow remains active:
+              WebGL is disabled or unsupported on this device.
             </p>
-            <div className="flex flex-col gap-2 text-left">
-              {NODES_CONFIG.map(node => (
-                <div key={node.id} className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-200">{node.stageName}</span>
-                  <span className="text-[10px] font-mono text-purple-400">{node.name}</span>
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
-        {/* Floating Telemetry HUD Drawer for Selected Node */}
+        {/* Floating Telemetry HUD Drawer for Selected Node (Left) */}
         {selectedNode && (
-          <div className="absolute top-4 left-4 z-10 max-w-xs sm:max-w-sm w-full bg-slate-900/90 backdrop-blur-md p-4 rounded-xl border border-purple-500/40 shadow-2xl text-xs space-y-3 pointer-events-auto">
+          <div className="absolute top-4 left-4 z-10 max-w-xs sm:max-w-sm w-full bg-slate-900/90 backdrop-blur-md p-4 rounded-xl border border-purple-500/50 shadow-2xl text-xs space-y-3 pointer-events-auto">
             <div className="flex items-center justify-between">
               <span className="font-mono text-[10px] text-purple-400 font-black uppercase tracking-wider flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping"></span>
                 <span>{selectedNode.stageName}</span>
               </span>
-              <span className="text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded font-mono font-bold">
-                ONLINE
+              <span className="text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded font-mono font-bold">
+                OPERATIONAL
               </span>
             </div>
             
@@ -1004,46 +1206,36 @@ export const SystemWorkflow3D: React.FC<SystemWorkflow3DProps> = ({
           </div>
         )}
 
-        {/* Orbit Helper Tip & Active Status */}
-        <div className="absolute top-4 right-4 z-10 pointer-events-none hidden sm:flex flex-col items-end gap-1.5">
+        {/* Orbit Helper Tip & Active Status (Right) */}
+        <div className="absolute top-4 right-4 z-10 pointer-events-none hidden sm:flex flex-col items-end gap-2">
           <div className="flex items-center gap-1.5 text-[10px] text-slate-300 bg-slate-900/80 backdrop-blur-sm px-3 py-1 rounded-full border border-slate-800 font-mono shadow">
             <Compass className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Click & Drag to Orbit | Scroll to Zoom</span>
+            <span>Click & Drag to Orbit | Scroll to Zoom | Click Station to Inspect</span>
           </div>
           <div className="flex items-center gap-2 text-[9px] font-mono text-slate-400 bg-slate-950/80 px-2.5 py-0.5 rounded border border-slate-800">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>UAV Recon Drone Airspeed: 58 km/h</span>
+            <span>UAV Drone Searchlight: Active Scan</span>
           </div>
         </div>
       </div>
 
-      {/* Interactive Workflow State Progress Bar */}
-      <div className="bg-slate-900/95 px-4 py-2.5 border-t border-slate-800 overflow-x-auto">
-        <div className="flex items-center justify-between gap-2 min-w-[700px] text-[10px] font-mono">
-          {[
-            { id: 'idle', label: '1. IDLE STANDBY' },
-            { id: 'sos_confirm', label: '2. SOS TRIGGER' },
-            { id: 'location_detecting', label: '3. GPS SATELLITE' },
-            { id: 'request_processing', label: '4. AI NLP FUSION' },
-            { id: 'notification_processing', label: '5. NOTIFY EOC' },
-            { id: 'emergency_active', label: '6. TACTICAL DRONE/SDRF' },
-            { id: 'resolved', label: '7. EVACUATION RESOLVED' }
-          ].map((st) => {
-            const isCurrent = workflowState === st.id;
+      {/* Bottom Architectural Flowchart Stepper - Judge Interactive Flow */}
+      <div className="bg-slate-900/95 px-4 py-3 border-t border-slate-800 overflow-x-auto">
+        <div className="flex items-center justify-between gap-2 min-w-[850px] text-[10px] font-mono">
+          {NODES_CONFIG.map((node, index) => {
+            const isCurrent = selectedNodeIndex === index;
             return (
               <button
-                key={st.id}
-                onClick={() => {
-                  onStateSelect?.(st.id as SystemWorkflowState);
-                  if (soundEnabled) playSynthTone(540, 'triangle', 0.08);
-                }}
-                className={`flex-1 py-2 px-2.5 rounded-lg font-bold text-center transition-all ${
+                key={node.id}
+                onClick={() => jumpToStage(index)}
+                className={`flex-1 py-2.5 px-2 rounded-xl font-bold text-center transition-all flex flex-col items-center gap-1 ${
                   isCurrent
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-950 ring-2 ring-purple-400 scale-[1.02]'
-                    : 'bg-slate-950 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                    ? 'bg-gradient-to-b from-purple-600 to-indigo-700 text-white shadow-xl shadow-purple-950 ring-2 ring-purple-400 scale-[1.03]'
+                    : 'bg-slate-950 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-800/80'
                 }`}
               >
-                {st.label}
+                <span className="text-[9px] opacity-75 font-semibold">STAGE {index + 1}</span>
+                <span className="truncate max-w-[110px] font-black">{node.stageName.split('. ')[1] || node.stageName}</span>
               </button>
             );
           })}
